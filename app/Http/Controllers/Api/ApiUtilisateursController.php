@@ -164,12 +164,12 @@ class ApiUtilisateursController extends Controller
         }
 
         // Mise à jour des champs modifiables
-        if ($request->filled('nom_utilisateur')) {
+        if ($request->filled('nom')) {
             $utilisateur->nom_utilisateur = $request->nom;
         }
 
-        if ($request->filled('prenom_utilisateur')) {
-            $utilisateur->prenom_utilisateur = $request->prenom;
+        if ($request->filled('prenom')) {
+            $utilisateur->last_name = $request->prenom;
         }
 
         // if ($request->filled('phone_utilisateur')) {

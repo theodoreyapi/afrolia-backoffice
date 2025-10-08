@@ -19,4 +19,14 @@ class Disponibilites extends Model
     protected $table = 'disponibilites';
 
     protected $primaryKey = 'id_disponibilite';
+
+    public function jour()
+    {
+        return $this->belongsTo(Jours::class, 'id_day', 'id_jour');
+    }
+
+    public function heure()
+    {
+        return $this->belongsTo(Heures::class, 'id_time', 'id_heure');
+    }
 }
