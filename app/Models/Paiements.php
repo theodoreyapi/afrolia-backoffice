@@ -25,4 +25,15 @@ class Paiements extends Model
     protected $table = 'paiements';
 
     protected $primaryKey = 'id_paiement';
+
+    // Relations
+    public function utilisateur()
+    {
+        return $this->belongsTo(UsersApp::class, 'id_user_app');
+    }
+
+    public function reservation()
+    {
+        return $this->belongsTo(Reservations::class, 'id_reservation');
+    }
 }

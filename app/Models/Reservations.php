@@ -34,4 +34,15 @@ class Reservations extends Model
     protected $table = 'reservations';
 
     protected $primaryKey = 'id_reservation';
+
+    // Relations
+    public function utilisateur()
+    {
+        return $this->belongsTo(UsersApp::class, 'id_user_app');
+    }
+
+    public function service()
+    {
+        return $this->belongsTo(Services::class, 'id_service');
+    }
 }

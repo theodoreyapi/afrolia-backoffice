@@ -4,44 +4,85 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Services;
+use App\Models\UsersApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class ApiServicesController extends Controller
 {
 
+    public function getServicesByUser($id)
+    {
+        // Vérifie si l'utilisateur existe
+        $userExists = UsersApp::where('id_user_app', $id)->exists();
+        if (!$userExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Utilisateur non trouvé',
+            ], 404);
+        }
+
+        // Récupère les services de cet utilisateur
+        $services = Services::with('specialite') // si tu as une relation définie
+            ->where('id_utilisateur', $id)
+            ->orderBy('id_service', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Liste des services récupérée avec succès',
+            'data' => $services
+        ]);
+    }
+
     public function createServices(Request $request)
     {
+        // Vérifie si la requête contient un seul service ou une liste
+        $isMultiple = is_array($request->services);
+
+        // Si c'est un seul service, on le transforme en tableau pour uniformiser le traitement
+        $servicesData = $isMultiple ? $request->services : [$request->all()];
+
+        // Règles de validation
         $rules = [
-            'id_utilisateur' => 'required|integer|exists:users_app,id_user_app',
-            'services' => 'required|array',
-            'services.*.prix' => 'required|numeric',
-            'services.*.minute' => 'required|integer',
-            'services.*.description' => 'required|string',
-            'services.*.commission' => 'required|numeric',
-            'services.*.id_speciale' => 'required|integer|exists:specialites,id_specialite',
+            '*.id_utilisateur' => 'required|integer|exists:users_app,id_user_app',
+            '*.prix' => 'required|numeric',
+            '*.minute' => 'required|integer',
+            '*.description' => 'required|string',
+            '*.commission' => 'required|numeric',
+            '*.id_speciale' => 'required|integer|exists:specialites,id_specialite',
         ];
 
-        $validator = Validator::make($request->all(), $rules);
+        $validator = Validator::make($servicesData, $rules);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'message' => collect($validator->errors()->all())
+                'message' => $validator->errors()->all(),
             ], 422);
         }
 
+        // Création des services
         $createdServices = [];
-        foreach ($request->services as $serviceData) {
-            $serviceData['id_utilisateur'] = $request->id_utilisateur;
-            $createdServices[] = Services::create($serviceData);
+
+        foreach ($servicesData as $serviceData) {
+            $createdServices[] = Services::create([
+                'id_utilisateur' => $serviceData['id_utilisateur'],
+                'prix' => $serviceData['prix'],
+                'minute' => $serviceData['minute'],
+                'description' => $serviceData['description'],
+                'commission' => $serviceData['commission'],
+                'id_speciale' => $serviceData['id_speciale'],
+            ]);
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Services créés avec succès',
-            'data' => $createdServices
-        ]);
+            'message' => count($createdServices) > 1
+                ? 'Services créés avec succès'
+                : 'Service créé avec succès',
+            $createdServices,
+        ], 201);
     }
 
 

@@ -24,4 +24,20 @@ class Reviews extends Model
     protected $table = 'reviews';
 
     protected $primaryKey = 'id_review';
+
+      // Relations
+    public function utilisateur()
+    {
+        return $this->belongsTo(UsersApp::class, 'id_utilisateur');
+    }
+
+    public function coiffeuse()
+    {
+        return $this->belongsTo(UsersApp::class, 'id_coiffeuse');
+    }
+
+    public function reservation()
+    {
+        return $this->belongsTo(Reservations::class, 'id_reservation');
+    }
 }

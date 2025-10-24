@@ -18,17 +18,17 @@ use Illuminate\Support\Facades\Validator;
 
 class ApiUserSalonController extends Controller
 {
-    public function update(Request $request, $id)
+    public function updateInfoBasic(Request $request, $id)
     {
         $utilisateur = UsersApp::findOrFail($id);
 
         $rules = [
             'nom' => 'sometimes|required|string',
             'prenom' => 'sometimes|required|string',
-            'phone' => 'sometimes|required|string|unique:users_app,phone,' . $id,
             'commune' => 'sometimes|required|string',
             'adresse' => 'nullable|string',
-            'experience' => 'nullable|integer',
+            'email' => 'nullable|string',
+            'experience' => 'nullable',
             'password' => 'nullable|string',
             'photo' => 'nullable|image',
         ];
@@ -72,10 +72,6 @@ class ApiUserSalonController extends Controller
         if ($request->filled('prenom')) {
             $utilisateur->last_name = $request->prenom;
         }
-
-        if ($request->filled('phone')) {
-            $utilisateur->phone = $request->phone;
-        }
         if ($request->filled('commune')) {
             $utilisateur->commune = $request->commune;
         }
@@ -83,7 +79,10 @@ class ApiUserSalonController extends Controller
             $utilisateur->adresse = $request->adresse;
         }
         if ($request->filled('experience')) {
-            $utilisateur->experience = $request->experience;
+            $utilisateur->experience = (int) $request->experience;
+        }
+        if ($request->filled('email')) {
+            $utilisateur->email = $request->email;
         }
         if ($request->filled('password')) {
             $utilisateur->password = Hash::make($request->password);
@@ -313,7 +312,7 @@ class ApiUserSalonController extends Controller
         $rules = [
             'id_utilisateur' => 'required|integer|exists:users_app,id_user_app',
             'langues' => 'required|array',
-            'langues.*' => 'integer|exists:langues,id_specialite',
+            'langues.*' => 'integer|exists:langues,id_langue',
         ];
 
         $messages = [
@@ -337,7 +336,7 @@ class ApiUserSalonController extends Controller
 
         // ✅ Si la validation passe
         $id_utilisateur = $request->id_utilisateur;
-        $specialites = $request->specialites;
+        $langues = $request->langues;
 
         DB::beginTransaction();
 
@@ -349,10 +348,10 @@ class ApiUserSalonController extends Controller
 
             // 2️⃣ Préparer les nouvelles lignes
             $inserts = [];
-            foreach ($specialites as $id_specialite) {
+            foreach ($langues as $id_langue) {
                 $inserts[] = [
                     'id_utilisateur' => $id_utilisateur,
-                    'id_speciale' => $id_specialite,
+                    'id_language' => $id_langue,
                 ];
             }
 
@@ -392,10 +391,7 @@ class ApiUserSalonController extends Controller
             })
             ->values();
 
-        return response()->json([
-            'success' => true,
-            'data' => $disponibilites
-        ]);
+        return response()->json($disponibilites);
     }
 
     /**

@@ -12,7 +12,9 @@ class ApiSociauxController extends Controller
 {
     public function getSociauxByUser($id)
     {
-        $sociaux = Sociaux::where('id_utilisateur', $id)->first();
+        $sociaux = Sociaux::where('id_utilisateur', $id)
+        ->select('instagram', 'facebook', 'whatsapp', 'tiktok', 'id_sociaux', 'id_utilisateur')
+        ->first();
 
         if (!$sociaux) {
             return response()->json([
@@ -21,10 +23,7 @@ class ApiSociauxController extends Controller
             ], 404);
         }
 
-        return response()->json([
-            'success' => true,
-            'data' => $sociaux
-        ]);
+        return response()->json($sociaux);
     }
 
     public function saveSociaux(Request $request)
@@ -160,5 +159,5 @@ class ApiSociauxController extends Controller
         ]);
     }
 
-    
+
 }

@@ -18,4 +18,15 @@ class ClientFavorite extends Model
     protected $table = 'client_favorites';
 
     protected $primaryKey = 'id_client_favorite';
+
+    // Relations
+    public function client()
+    {
+        return $this->belongsTo(UsersApp::class, 'client_id');
+    }
+
+    public function stylist()
+    {
+        return $this->belongsTo(UsersApp::class, 'stylist_id');
+    }
 }

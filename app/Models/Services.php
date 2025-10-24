@@ -22,4 +22,14 @@ class Services extends Model
     protected $table = 'services';
 
     protected $primaryKey = 'id_service';
+
+    public function utilisateur()
+    {
+        return $this->belongsTo(UsersApp::class, 'id_utilisateur', 'id_user_app');
+    }
+
+    public function specialite()
+    {
+        return $this->belongsTo(Specialites::class, 'id_speciale', 'id_specialite');
+    }
 }

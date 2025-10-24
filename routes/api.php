@@ -1,5 +1,11 @@
 <?php
 
+use App\Http\Controllers\Api\ApiAvisController;
+use App\Http\Controllers\Api\ApiClientFavoriteController;
+use App\Http\Controllers\Api\ApiDashboardCoiffeuseController;
+use App\Http\Controllers\Api\ApiGainsCoiffeuseController;
+use App\Http\Controllers\Api\ApiPaiementsController;
+use App\Http\Controllers\Api\ApiReservationsController;
 use App\Http\Controllers\Api\ApiSecurityController;
 use App\Http\Controllers\Api\ApiServicesController;
 use App\Http\Controllers\Api\ApiSociauxController;
@@ -24,27 +30,58 @@ Route::delete('delete/{id}', [ApiUtilisateursController::class, 'supprimerCompte
 Route::get('help', [ApiSecurityController::class, 'helps']);
 Route::get('security', [ApiSecurityController::class, 'security']);
 
-// Salons
-Route::post('update/{id}', [ApiUserSalonController::class, 'update']);
-Route::post('updatepresentation/{id}', [ApiUserSalonController::class, 'update']);
+// Salons Complets
+Route::post('updateinfobasic/{id}', [ApiUserSalonController::class, 'updateInfoBasic']);
+Route::post('updatepresentation/{id}', [ApiUserSalonController::class, 'updatePresentation']);
 Route::get('presentation/{id}', [ApiUserSalonController::class, 'presentation']);
 Route::get('specialites', [ApiUserSalonController::class, 'specialites']);
 Route::get('langues', [ApiUserSalonController::class, 'langues']);
 Route::get('associationspecialite/{id}', [ApiUserSalonController::class, 'assoSpecialite']);
 Route::get('associationlangue/{id}', [ApiUserSalonController::class, 'assoLangue']);
-Route::post('users/specialites/associer', [ApiUserSalonController::class, 'associerSpecialitesUtilisateur']);
-Route::post('users/langues/associer', [ApiUserSalonController::class, 'associerLanguesUtilisateur']);
+Route::post('hair/specialites/associer', [ApiUserSalonController::class, 'associerSpecialitesUtilisateur']);
+Route::post('hair/langues/associer', [ApiUserSalonController::class, 'associerLanguesUtilisateur']);
 Route::get('disponibilites/{id}', [ApiUserSalonController::class, 'getDisponibilitesByUser']);
 Route::post('disponibilites', [ApiUserSalonController::class, 'saveDisponibilites']);
 Route::get('jours-heures', [ApiUserSalonController::class, 'getJoursEtHeures']);
-Route::get('users/{id}/services', [ApiServicesController::class, 'getServicesByUser']);
-Route::post('users/{id}/services', [ApiServicesController::class, 'createServices']);
+Route::get('hair/services/{id}', [ApiServicesController::class, 'getServicesByUser']);
+Route::post('hair/services', [ApiServicesController::class, 'createServices']);
 Route::put('services/{id}', [ApiServicesController::class, 'updateService']);
 Route::delete('services/{id}', [ApiServicesController::class, 'deleteService']);
-Route::get('users/{id}/sociaux', [ApiSociauxController::class, 'getSociauxByUser']);
-Route::post('users/sociaux', [ApiSociauxController::class, 'saveSociaux']);
-Route::get('users/{id}/gallery', [ApiSociauxController::class, 'getGalleryByUser']);
-Route::post('users/gallery', [ApiSociauxController::class, 'createGallery']);
+Route::get('hair/sociaux/{id}', [ApiSociauxController::class, 'getSociauxByUser']);
+Route::post('hair/sociaux', [ApiSociauxController::class, 'saveSociaux']);
+Route::get('hair/gallery/{id}', [ApiSociauxController::class, 'getGalleryByUser']);
+Route::post('hair/gallery', [ApiSociauxController::class, 'createGallery']);
 Route::put('gallery/{id}', [ApiSociauxController::class, 'updateGallery']);
 Route::delete('gallery/{id}', [ApiSociauxController::class, 'deleteGallery']);
 
+Route::prefix('reservations')->group(function () {
+    Route::get('/user/{id}', [ApiReservationsController::class, 'getReservationByUser']);
+    Route::post('/', [ApiReservationsController::class, 'store']);
+    Route::put('/{id}', [ApiReservationsController::class, 'update']);
+    Route::delete('/{id}', [ApiReservationsController::class, 'destroy']);
+});
+Route::prefix('paiements')->group(function () {
+    Route::get('/user/{id_utilisateur}', [ApiPaiementsController::class, 'getPaiementByUser']);
+    Route::post('/', [ApiPaiementsController::class, 'store']);
+    Route::put('/{id_paiement}', [ApiPaiementsController::class, 'update']);
+    Route::delete('/{id_paiement}', [ApiPaiementsController::class, 'destroy']);
+});
+Route::prefix('gains-coiffeuses')->group(function () {
+    Route::get('/user/{id_utilisateur}', [ApiGainsCoiffeuseController::class, 'getGainsByUser']);
+    Route::post('/', [ApiGainsCoiffeuseController::class, 'store']);
+    Route::put('/{id_gain_coiffeuse}', [ApiGainsCoiffeuseController::class, 'update']);
+    Route::delete('/{id_gain_coiffeuse}', [ApiGainsCoiffeuseController::class, 'destroy']);
+});
+Route::prefix('avis')->group(function () {
+    Route::get('/coiffeuse/{id_coiffeuse}', [ApiAvisController::class, 'getAvisByCoiffeuse']);
+    Route::post('/', [ApiAvisController::class, 'store']);
+    Route::put('/{id_avis}', [ApiAvisController::class, 'update']);
+    Route::delete('/{id_avis}', [ApiAvisController::class, 'destroy']);
+});
+Route::prefix('favoris')->group(function () {
+    Route::post('/ajouter', [ApiClientFavoriteController::class, 'addFavorite']);
+    Route::delete('/supprimer', [ApiClientFavoriteController::class, 'removeFavorite']);
+    Route::get('/client/{client_id}', [ApiClientFavoriteController::class, 'getFavoritesByClient']);
+    Route::post('/verifier', [ApiClientFavoriteController::class, 'isFavorite']);
+});
+Route::get('/dashboard/{id_coiffeur}', [ApiDashboardCoiffeuseController::class, 'index']);

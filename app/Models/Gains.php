@@ -23,4 +23,14 @@ class Gains extends Model
     protected $table = 'gains';
 
     protected $primaryKey = 'id_gain';
+
+    public function utilisateur()
+    {
+        return $this->belongsTo(UsersApp::class, 'id_user_app');
+    }
+
+    public function paiement()
+    {
+        return $this->belongsTo(Paiements::class, 'id_paiement');
+    }
 }
