@@ -20,87 +20,73 @@ class ApiUserSalonController extends Controller
 {
     public function updateInfoBasic(Request $request, $id)
     {
-        $utilisateur = UsersApp::findOrFail($id);
+        try {
+            $utilisateur = UsersApp::findOrFail($id);
 
-        $rules = [
-            'nom' => 'sometimes|required|string',
-            'prenom' => 'sometimes|required|string',
-            'commune' => 'sometimes|required|string',
-            'adresse' => 'nullable|string',
-            'email' => 'nullable|string',
-            'experience' => 'nullable',
-            'password' => 'nullable|string',
-            'photo' => 'nullable|image',
-        ];
+            $rules = [
+                'nom' => 'sometimes|required|string',
+                'prenom' => 'sometimes|required|string',
+                'commune' => 'sometimes|required|string',
+                'adresse' => 'nullable|string',
+                'email' => 'nullable|string',
+                'experience' => 'nullable',
+                'password' => 'nullable|string',
+                'photo' => 'nullable|file|mimes:jpg,jpeg,png,webp|max:5120', // 5MB
+            ];
 
-        $messages = [
-            'nom.required' => 'Veuillez saisir votre nom.',
-            'prenom.required' => 'Veuillez saisir votre prénom.',
-            'phone.required' => 'Veuillez saisir votre numéro de téléphone.',
-            'phone.unique' => 'Le numéro de téléphone est deja utilisé.',
-            'commune.required' => 'Veuillez saisir votre commune.',
-        ];
+            $messages = [
+                'nom.required' => 'Veuillez saisir votre nom.',
+                'prenom.required' => 'Veuillez saisir votre prénom.',
+                'commune.required' => 'Veuillez saisir votre commune.',
+            ];
 
-        $validator = Validator::make($request->all(), $rules, $messages);
+            $validator = Validator::make($request->all(), $rules, $messages);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => collect($validator->errors()->all()),
-            ], 422);
-        }
-
-        if ($request->hasFile('photo')) {
-            // supprimer l'ancienne photo si elle existe
-            if ($utilisateur->photo_utilisateur) {
-                $anciennePhotoPath = str_replace('/storage/', '', $utilisateur->photo_utilisateur);
-                Storage::disk('public')->delete($anciennePhotoPath);
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => collect($validator->errors()->all()),
+                ], 422);
             }
 
-            $timestamp = Carbon::now()->format('Ymd_His');
-            $photo = $request->file('photo');
-            $photoName = 'photo_' . $timestamp . '.' . $photo->getClientOriginalExtension();
-            $photoPath = $photo->storeAs('utilisateurs/photos', $photoName, 'public');
-            $utilisateur->photo_utilisateur = Storage::url($photoPath);
-        }
+            // 🖼️ Gestion de la photo
+            if ($request->hasFile('photo')) {
+                $timestamp = Carbon::now()->format('Ymd_His');
+                $photo = $request->file('photo');
+                $photoName = 'photo_' . $timestamp . '_' . uniqid() . '.' . $photo->getClientOriginalExtension();
 
-        // Mise à jour des champs modifiables
-        if ($request->filled('nom')) {
-            $utilisateur->name = $request->nom;
-        }
+                // 📂 Enregistre dans public/salon/user
+                $photo->move(public_path('salon/user'), $photoName);
 
-        if ($request->filled('prenom')) {
-            $utilisateur->last_name = $request->prenom;
-        }
-        if ($request->filled('commune')) {
-            $utilisateur->commune = $request->commune;
-        }
-        if ($request->filled('adresse')) {
-            $utilisateur->adresse = $request->adresse;
-        }
-        if ($request->filled('experience')) {
-            $utilisateur->experience = (int) $request->experience;
-        }
-        if ($request->filled('email')) {
-            $utilisateur->email = $request->email;
-        }
-        if ($request->filled('password')) {
-            $utilisateur->password = Hash::make($request->password);
-        }
+                // 🔗 URL publique
+                $photoUrl = url('afrolia/public/salon/user/' . $photoName);
+                $utilisateur->photo = $photoUrl;
+            }
 
-        if ($utilisateur->save()) {
+            // 🧾 Mise à jour des champs
+            if ($request->filled('nom')) $utilisateur->name = $request->nom;
+            if ($request->filled('prenom')) $utilisateur->last_name = $request->prenom;
+            if ($request->filled('commune')) $utilisateur->commune = $request->commune;
+            if ($request->filled('adresse')) $utilisateur->adresse = $request->adresse;
+            if ($request->filled('experience')) $utilisateur->experience = (int)$request->experience;
+            if ($request->filled('email')) $utilisateur->email = $request->email;
+            if ($request->filled('password')) $utilisateur->password = Hash::make($request->password);
+
+            $utilisateur->save();
+
             return response()->json([
                 'success' => true,
                 'message' => 'Informations mises à jour avec succès',
-                'photo' => url($utilisateur->photo)
+                'photo' => $utilisateur->photo ?? '',
             ], 200);
-        } else {
+        } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => "Impossible de mettre à jour vos informations. Veuillez recommencer.",
-            ], 401);
+                'message' => 'Erreur serveur : ' . $e->getMessage(),
+            ], 500);
         }
     }
+
 
     public function updatePresentation(Request $request, $id)
     {
@@ -449,6 +435,7 @@ class ApiUserSalonController extends Controller
         // Construction du tableau final
         $result = $jours->map(function ($jour) use ($heures) {
             return [
+                'id_jour' => $jour->id_jour, // ✅ ajout de l'id_jour ici
                 'jour' => $jour->libelle,
                 'heures' => $heures->map(function ($heure) {
                     return [
