@@ -4,37 +4,91 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservations;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ApiReservationsController extends Controller
 {
-    // ✅ 1. Liste des réservations d’un utilisateur (first)
-    public function getReservationByUser($id)
+    // ✅ 1. Liste des réservations d’un coiffeur
+    public function getReservationsByCoiffeur($id_coiffeur)
     {
-        $reservation = Reservations::where('id_utilisateur', $id)
-            ->with(['service'])
-            ->first();
+        $reservations = Reservations::join('users_app as clients', 'reservations.id_client', '=', 'clients.id_user_app')
+            ->join('services', 'reservations.id_service', '=', 'services.id_service')
+            ->join('specialites', 'services.id_speciale', '=', 'specialites.id_specialite')
+            ->select(
+                'reservations.id_reservation',
+                'reservations.numero_reservation',
+                'reservations.date_reservation',
+                'reservations.heure_reservation',
+                'reservations.statut',
+                'reservations.montant_total',
+                'clients.name as nom_client',
+                'clients.last_name as prenom_client',
+                'clients.phone as telephone',
+                'clients.photo as photo_client',
+                'specialites.libelle as nom_service'
+            )
+            ->where('reservations.id_coiffeur', $id_coiffeur)
+            ->orderBy('reservations.date_reservation', 'desc')
+            ->get();
 
-        if (!$reservation) {
-            return response()->json(['message' => 'Aucune réservation trouvée'], 404);
+        if ($reservations->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucune réservation trouvée pour ce coiffeur'
+            ], 404);
         }
 
-        return response()->json($reservation);
+        $reservations->transform(function ($reservation) {
+            $reservation->statut_label = match ($reservation->statut) {
+                'confirmee' => 'Confirmée',
+                'en_attente' => 'En attente',
+                'en_cours' => 'En cours',
+                'terminee' => 'Terminée',
+                'annulee' => 'Annulée',
+                'no_show' => 'Non honorée',
+                default => ucfirst($reservation->statut),
+            };
+            $reservation->montant_affiche = number_format($reservation->montant_total, 0, ',', ' ') . ' CFA';
+            return $reservation;
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Liste des réservations du coiffeur récupérée avec succès',
+            'data' => $reservations
+        ]);
     }
 
     // ✅ 2. Création d’une réservation
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'id_client' => 'required|integer',
+            'id_coiffeur' => 'required|integer',
+            'id_service' => 'required|integer',
             'date_reservation' => 'required|date',
             'heure_reservation' => 'required',
-            'statut' => 'required|string',
-            'id_utilisateur' => 'required|integer',
-            'id_service' => 'required|integer',
+            'prix_service' => 'required|numeric',
+            'montant_commission' => 'required|numeric',
+            'montant_total' => 'required|numeric',
+            'methode_paiement' => 'required|string|in:stripe,mobile_money,cash',
+            'notes' => 'nullable|string',
         ]);
 
+        // Génération du numero_reservation unique
+        do {
+            $numero_reservation = 'RES-' . date('Ymd') . '-' . strtoupper(Str::random(6));
+        } while (Reservations::where('numero_reservation', $numero_reservation)->exists());
+
+        $validated['numero_reservation'] = $numero_reservation;
+
         $reservation = Reservations::create($validated);
+
         return response()->json([
+            'success' => true,
             'message' => 'Réservation créée avec succès',
             'data' => $reservation
         ], 201);
@@ -46,11 +100,30 @@ class ApiReservationsController extends Controller
         $reservation = Reservations::find($id);
 
         if (!$reservation) {
-            return response()->json(['message' => 'Réservation non trouvée'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation non trouvée'
+            ], 404);
         }
 
-        $reservation->update($request->all());
+        $validated = $request->validate([
+            'date_reservation' => 'sometimes|date',
+            'heure_reservation' => 'sometimes',
+            'statut' => 'sometimes|in:en_attente,confirmee,en_cours,terminee,annulee,no_show',
+            'prix_service' => 'sometimes|numeric',
+            'montant_commission' => 'sometimes|numeric',
+            'montant_total' => 'sometimes|numeric',
+            'statut_paiement' => 'sometimes|in:en_attente,paye,rembourse,echoue',
+            'methode_paiement' => 'sometimes|in:stripe,mobile_money,cash',
+            'notes' => 'nullable|string',
+            'raison_annulation' => 'nullable|string',
+            'annule_par' => 'nullable|in:client,coiffeur,admin'
+        ]);
+
+        $reservation->update($validated);
+
         return response()->json([
+            'success' => true,
             'message' => 'Réservation mise à jour avec succès',
             'data' => $reservation
         ]);
@@ -62,10 +135,184 @@ class ApiReservationsController extends Controller
         $reservation = Reservations::find($id);
 
         if (!$reservation) {
-            return response()->json(['message' => 'Réservation non trouvée'], 404);
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation non trouvée'
+            ], 404);
         }
 
         $reservation->delete();
-        return response()->json(['message' => 'Réservation supprimée avec succès']);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation supprimée avec succès'
+        ]);
+    }
+
+    // ✅ 5. Confirmer une réservation
+    public function confirmerReservation(Request $request, $id_reservation)
+    {
+        $reservation = Reservations::where('id_reservation', $id_reservation)
+            ->where('id_coiffeur', $request->id_coiffeur)
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation introuvable ou non autorisée'
+            ], 404);
+        }
+
+        $reservation->update([
+            'statut' => 'confirmee',
+            'confirme_le' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation confirmée avec succès',
+            'data' => $reservation
+        ]);
+    }
+
+    // 🚫 6. Refuser (Annuler) une réservation
+    public function refuserReservation(Request $request, $id_reservation)
+    {
+        $reservation = Reservations::where('id_reservation', $id_reservation)
+            ->where('id_coiffeur', $request->id_coiffeur)
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation introuvable ou non autorisée'
+            ], 404);
+        }
+
+        $reservation->update([
+            'statut' => 'annulee',
+            'annule_le' => now(),
+            'annule_par' => 'coiffeur',
+            'raison_annulation' => $request->input('raison', 'Aucune raison spécifiée')
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation annulée avec succès',
+            'data' => $reservation
+        ]);
+    }
+
+    // 🏁 7. Terminer une réservation
+    public function terminerReservation(Request $request, $id_reservation)
+    {
+        $reservation = Reservations::where('id_reservation', $id_reservation)
+            ->where('id_coiffeur', $request->id_coiffeur)
+            ->first();
+
+        if (!$reservation) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Réservation introuvable ou non autorisée'
+            ], 404);
+        }
+
+        if (!in_array($reservation->statut, ['confirmee', 'en_cours'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Impossible de terminer cette réservation. Elle doit être confirmée ou en cours.'
+            ], 400);
+        }
+
+        $reservation->update([
+            'statut' => 'terminee',
+            'termine_le' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Réservation marquée comme terminée avec succès',
+            'data' => $reservation
+        ]);
+    }
+
+    public function recentReservations($id_coiffeur)
+    {
+        // Récupère les 3 réservations les plus récentes pour un coiffeur donné
+        $reservations = Reservations::where('id_coiffeur', $id_coiffeur)
+            ->orderBy('date_reservation', 'desc')
+            ->orderBy('heure_reservation', 'desc')
+            ->take(3)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $reservations
+        ]);
+    }
+
+    public function reservationStatsByCoiffeur($id_coiffeur)
+    {
+        $today = Carbon::today()->toDateString();
+        $startOfMonth = Carbon::now()->startOfMonth()->toDateString();
+
+        // Nombre total de clients avec réservations terminées pour ce coiffeur
+        $totalClientsTerminees = Reservations::where('statut', 'terminee')
+            ->where('id_coiffeur', $id_coiffeur)
+            ->distinct('id_client')
+            ->count('id_client');
+
+        // Revenu du jour pour réservations terminées
+        $revenuJour = Reservations::where('statut', 'terminee')
+            ->where('id_coiffeur', $id_coiffeur)
+            ->whereDate('date_reservation', $today)
+            ->sum('montant_total');
+
+        // Revenu du mois en cours pour réservations terminées
+        $revenuMois = Reservations::where('statut', 'terminee')
+            ->where('id_coiffeur', $id_coiffeur)
+            ->whereBetween('date_reservation', [$startOfMonth, $today])
+            ->sum('montant_total');
+
+        // Revenu des réservations en attente
+        $revenuAttente = Reservations::where('statut', 'en_attente')
+            ->where('id_coiffeur', $id_coiffeur)
+            ->sum('montant_total');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_clients_termines' => $totalClientsTerminees,
+                'revenu_jour' => $revenuJour,
+                'revenu_mois' => $revenuMois,
+                'revenu_en_attente' => $revenuAttente
+            ]
+        ]);
+    }
+
+    public function topServices($id_coiffeur)
+    {
+        $topServices = DB::table('reservations as r')
+            ->select(
+                's.id_service',
+                's.description',
+                's.prix',
+                's.minute',
+                'sp.libelle as specialite',
+                DB::raw('COUNT(r.id_reservation) as nombre_reservations')
+            )
+            ->join('services as s', 'r.id_service', '=', 's.id_service')
+            ->join('specialites as sp', 's.id_speciale', '=', 'sp.id_specialite')
+            ->where('r.id_coiffeur', $id_coiffeur)
+            ->where('r.statut', 'terminee')
+            ->groupBy('s.id_service', 's.description', 's.prix', 's.minute', 'sp.libelle')
+            ->orderByDesc('nombre_reservations')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $topServices
+        ]);
     }
 }

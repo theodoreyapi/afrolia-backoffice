@@ -59,6 +59,16 @@ Route::prefix('reservations')->group(function () {
     Route::post('/', [ApiReservationsController::class, 'store']);
     Route::put('/{id}', [ApiReservationsController::class, 'update']);
     Route::delete('/{id}', [ApiReservationsController::class, 'destroy']);
+
+    Route::get('/coiffeuse/{id_coiffeuse}', [ApiReservationsController::class, 'getReservationsByCoiffeuse']);
+    Route::put('/confirmer/{id_reservation}', [ApiReservationsController::class, 'confirmerReservation']);
+    Route::put('/refuser/{id_reservation}', [ApiReservationsController::class, 'refuserReservation']);
+    Route::put('/terminer/{id_reservation}', [ApiReservationsController::class, 'terminerReservation']);
+
+    Route::get('/recentes/{id_coiffeur}', [ApiReservationsController::class, 'recentReservations']);
+    Route::get('/statistiques/{id_coiffeur}', [ApiReservationsController::class, 'reservationStatsByCoiffeur']);
+
+    Route::get('/populaires/{id_coiffeur}', [ApiReservationsController::class, 'topServices']);
 });
 Route::prefix('paiements')->group(function () {
     Route::get('/user/{id_utilisateur}', [ApiPaiementsController::class, 'getPaiementByUser']);
@@ -71,6 +81,8 @@ Route::prefix('gains-coiffeuses')->group(function () {
     Route::post('/', [ApiGainsCoiffeuseController::class, 'store']);
     Route::put('/{id_gain_coiffeuse}', [ApiGainsCoiffeuseController::class, 'update']);
     Route::delete('/{id_gain_coiffeuse}', [ApiGainsCoiffeuseController::class, 'destroy']);
+    Route::get('/evolution-annuelle/{id_utilisateur}', [ApiGainsCoiffeuseController::class, 'getEvolutionAnnuelle']);
+    Route::get('/revenus-par-service/{id_utilisateur}', [ApiGainsCoiffeuseController::class, 'getRevenusParService']);
 });
 Route::prefix('avis')->group(function () {
     Route::get('/coiffeuse/{id_coiffeuse}', [ApiAvisController::class, 'getAvisByCoiffeuse']);
