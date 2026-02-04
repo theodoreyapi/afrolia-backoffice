@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 class ApiReservationsController extends Controller
 {
     // ✅ 1. Liste des réservations d’un coiffeur
-    public function getReservationsByCoiffeur($id_coiffeur)
+    public function getReservationsByCoiffeuse($id_coiffeur)
     {
         $reservations = Reservations::join('users_app as clients', 'reservations.id_client', '=', 'clients.id_user_app')
             ->join('services', 'reservations.id_service', '=', 'services.id_service')

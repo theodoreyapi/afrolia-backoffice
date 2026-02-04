@@ -1,0 +1,641 @@
+/* Custom CSS for Afrolia Hero Section */
+
+/* Variables (optional but good for consistency) */
+:root {
+    --primary-color: #f0a442; /* The orange/gold color */
+    --text-color: #ffffff;
+    --background-image: url("../images/hero.jpg"); /* Replace with the actual image path */
+    --overlay-color: rgba(0, 0, 0, 0.4); /* Dark overlay to make text pop */
+}
+
+/* 1. Hero Section Setup */
+.hero-section {
+    position: relative;
+    min-height: 100vh; /* Full viewport height */
+    overflow: hidden;
+    color: var(--text-color);
+    background-color: #7a7a7a6b; /* Fallback color */
+}
+
+/* 2. Background Image and Overlay Effect */
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Replace 'placeholder-woman.jpg' with the path to your high-res image of the woman */
+    background-image: var(--background-image);
+    background-size: cover;
+    background-position: center 30%; /* Adjust focus of the image */
+    z-index: -2; /* Place behind the content */
+}
+
+/* Fading/Soft Overlay - The image in the example is very soft and bright */
+.hero-section::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* This gradient helps soften the left side and maintain focus on the woman */
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.6) 0%,
+        /* Darker on the left for text */ rgba(0, 0, 0, 0.2) 35%,
+        transparent 60%
+    );
+    z-index: -1; /* Between background and content */
+}
+
+/* 3. Text and Branding Styles */
+.brand-text {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.star-icon {
+    font-size: 1.5rem;
+    vertical-align: middle;
+}
+
+.highlight-text {
+    color: var(--primary-color);
+}
+
+.display-3 {
+    font-size: calc(1.75rem + 3vw); /* Responsive font size */
+    line-height: 1.1;
+}
+
+.description-text {
+    font-weight: 300;
+    opacity: 0.9;
+}
+
+/* 4. Button Styles */
+
+/* Language Buttons */
+.btn-lang {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--text-color);
+    background-color: transparent;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.btn-lang.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--text-color);
+}
+
+/* Action Buttons */
+.btn-action {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #333; /* Dark text for contrast */
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+}
+
+.btn-connect {
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    color: var(--text-color);
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 0.5rem;
+}
+
+/* 5. Statistics Styles */
+.stats-row {
+    margin-top: 2rem;
+}
+
+.stat-item {
+    text-align: left;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    font-weight: 300;
+    opacity: 0.8;
+}
+
+/* How It Works Section Styles */
+
+/* Base Section Background */
+.how-it-works-section {
+    background-color: #fcf8f3; /* Very light, slightly warm off-white color */
+}
+
+/* Subtitle under the main title */
+.lead-subtitle {
+    color: #6c757d; /* Soft gray for the subtext */
+    font-size: 1.1rem;
+}
+
+/* Step Card Container */
+.step-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); /* Soft, subtle shadow */
+    border: 1px solid rgba(255, 255, 255, 0); /* Invisible border for consistency */
+    transition: all 0.3s ease;
+}
+
+.step-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Step Number Badge (1, 2, 3) */
+.step-number {
+    position: absolute;
+    top: -15px; /* Position above the card */
+    left: 20px;
+    background-color: var(
+        --primary-color
+    ); /* The gold/orange color from the previous section */
+    color: #333; /* Dark text for contrast */
+    font-weight: 700;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Icon Box Styling */
+.icon-box {
+    width: 55px;
+    height: 55px;
+    background-color: #f7f3ed; /* Light background for the icon container */
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Placeholder for the actual icon (you might replace this with font-awesome or another library) */
+.icon-placeholder {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+/* Step Title */
+.step-title {
+    font-size: 1.35rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+/* Step Description */
+.step-description {
+    font-size: 0.95rem;
+    color: #6c757d;
+    line-height: 1.6;
+}
+
+/* Develop Your Activity Section Styles pour les coiffeuses */
+
+.develop-activity-section {
+    background-color: #fcf8f3;
+    position: relative;
+}
+
+/* Tagline */
+.tagline-coiffeuse {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Image Card */
+.image-stats-card {
+    border-radius: 16px;
+    background: #fff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.image-stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.image-container-activity img {
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+    object-fit: cover;
+}
+
+/* Stats */
+.stats-bar .stat-large {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.stats-bar .stat-small {
+    font-size: 0.85rem;
+}
+
+.stats-bar .border-start,
+.stats-bar .border-end {
+    border-color: #eee !important;
+}
+
+/* Avantages */
+.benefit-icon {
+    font-size: 1.8rem;
+    color: var(--primary-color);
+    flex-shrink: 0;
+}
+
+.benefit-description {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+/* Boutons */
+.btn-action {
+    background-color: var(--primary-color);
+    color: #fff;
+    font-weight: 600;
+    padding: 0.75rem 1.75rem;
+    border-radius: 8px;
+    transition: background 0.3s ease;
+}
+.btn-action:hover {
+    background-color: #e49e00;
+}
+
+.btn-connect {
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+.btn-connect:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+/* Footer note */
+.footer-note-activity {
+    font-size: 0.85rem;
+    color: #777;
+}
+
+
+/* Find the Perfect Stylist Section Styles pour les clients */
+.find-stylist-section {
+  background-color: #fefaf5;
+}
+
+/* Tagline */
+.tagline-clientele {
+  background-color: #fdf1db;
+  color: #a67b2f;
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  border-radius: 1rem;
+  letter-spacing: 0.4px;
+}
+
+/* Main heading */
+.highlight-text {
+  color: #f4b23f;
+}
+
+.lead-text {
+  color: #6c5f53;
+  font-size: 1.05rem;
+  line-height: 1.6;
+}
+
+/* Benefit list */
+.benefit-icon {
+  background-color: #fbe8c5;
+  border-radius: 10px;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.benefit-title {
+  color: #2c2c2c;
+  font-size: 1rem;
+}
+
+.benefit-description {
+  color: #7a7a7a;
+  font-size: 0.95rem;
+}
+
+/* Buttons */
+.btn-action {
+  background-color: #f4b23f;
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 0.75rem 1.7rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+  background-color: #dca129;
+}
+
+.btn-how-it-works {
+  border: 1.8px solid #d8b87e;
+  color: #8b6b3e;
+  background-color: transparent;
+  font-weight: 600;
+  padding: 0.75rem 1.7rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-how-it-works:hover {
+  background-color: #fdf1db;
+}
+
+/* IMAGE & TESTIMONIAL */
+.testimonial-card-container {
+  position: relative;
+}
+
+.testimonial-card-container img {
+  width: 100%;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+.testimonial-box {
+  position: absolute;
+  top: 5%;
+  left: 8%;
+  right: 8%;
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
+}
+
+.initials-circle {
+  width: 45px;
+  height: 45px;
+  background-color: #f4b23f;
+  color: #fff;
+  font-weight: 700;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.name-review {
+  font-size: 1rem;
+  color: #2c2c2c;
+}
+
+.rating-star {
+  color: #f4b23f;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+.review-text {
+  color: #5f5f5f;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .testimonial-card-container {
+    margin-top: 2rem;
+  }
+
+  .testimonial-box {
+    position: relative;
+    top: -30px;
+    left: 0;
+    right: 0;
+  }
+}
+
+
+/* SECTION BACKGROUND pourquoi nous choisir*/
+.why-choose-section {
+  background-color: #f4f4f4;
+}
+
+/* Subtitle */
+.lead-subtitle-why {
+  color: #7a7a7a;
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+/* Accent color for brand name */
+.highlight-text {
+  color: #f4b23f;
+}
+
+/* BENEFIT BOX */
+.benefit-box {
+  background-color: #fffaf4;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  border: none;
+  text-align: left;
+  padding: 2rem;
+}
+
+.benefit-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ICON CIRCLE */
+.icon-box-small {
+  width: 52px;
+  height: 52px;
+  background-color: #fbe8c5;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.icon-placeholder-small {
+  font-size: 1.4rem;
+  color: #c08d28;
+}
+
+/* TITLE + TEXT */
+.benefit-title-small {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c2c2c;
+  margin-bottom: 0.4rem;
+}
+
+.benefit-description-small {
+  color: #7a7a7a;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* RESPONSIVE OPTIMIZATION */
+@media (max-width: 768px) {
+  .benefit-box {
+    text-align: center;
+  }
+
+  .icon-box-small {
+    margin: 0 auto 1rem;
+  }
+}
+
+
+/* Footer Styles */:root {
+  --footer-bg: #2c241c; /* Marron foncé profond, plus élégant */
+  --footer-accent: #f0a442; /* Doré chaud */
+  --footer-text: #d9cbb3; /* Beige clair lisible */
+  --footer-muted: #a89374; /* Tons dorés doux */
+}
+
+.main-footer {
+  background-color: var(--footer-bg);
+  color: var(--footer-text);
+  font-family: "Poppins", sans-serif;
+  letter-spacing: 0.3px;
+}
+
+/* Brand */
+.footer-brand {
+  font-size: 1.8rem;
+  font-weight: 800;
+  color: var(--footer-accent);
+  display: flex;
+  align-items: center;
+}
+
+.footer-brand .star-icon {
+  font-size: 1.2rem;
+  margin-right: 6px;
+  color: var(--footer-accent);
+  animation: sparkle 1.5s infinite ease-in-out;
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.3); }
+}
+
+.footer-tagline {
+  font-size: 1rem;
+  color: var(--footer-muted);
+  margin-top: 0.5rem;
+}
+
+/* Social Icons */
+.social-icons a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: var(--footer-text);
+  font-size: 1.1rem;
+  margin-right: 0.6rem;
+  transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+  background-color: var(--footer-accent);
+  color: #1c130a;
+  transform: translateY(-3px);
+  box-shadow: 0 0 10px rgba(240, 164, 66, 0.5);
+}
+
+/* Headings */
+.footer-heading {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 1rem;
+  position: relative;
+}
+
+.footer-heading::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 0;
+  width: 35px;
+  height: 2px;
+  background-color: var(--footer-accent);
+  border-radius: 1px;
+}
+
+/* Links */
+.footer-list li a {
+  color: var(--footer-muted);
+  text-decoration: none;
+  font-size: 0.96rem;
+  display: inline-block;
+  padding: 2px 0;
+  transition: color 0.3s, transform 0.2s;
+}
+
+.footer-list li a:hover {
+  color: var(--footer-accent);
+  transform: translateX(3px);
+}
+
+/* Divider */
+.footer-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Bottom Row */
+.copyright-text,
+.legal-links {
+  font-size: 0.9rem;
+  color: var(--footer-muted);
+}
+
+.legal-links a {
+  color: var(--footer-muted);
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.legal-links a:hover {
+  color: var(--footer-accent);
+}

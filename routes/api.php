@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApiDashboardCoiffeuseController;
 use App\Http\Controllers\Api\ApiGainsCoiffeuseController;
 use App\Http\Controllers\Api\ApiPaiementsController;
 use App\Http\Controllers\Api\ApiReservationsController;
+use App\Http\Controllers\Api\ApiSalonController;
 use App\Http\Controllers\Api\ApiSecurityController;
 use App\Http\Controllers\Api\ApiServicesController;
 use App\Http\Controllers\Api\ApiSociauxController;
@@ -54,6 +55,9 @@ Route::post('hair/gallery', [ApiSociauxController::class, 'createGallery']);
 Route::put('gallery/{id}', [ApiSociauxController::class, 'updateGallery']);
 Route::delete('gallery/{id}', [ApiSociauxController::class, 'deleteGallery']);
 
+Route::get('salons', [ApiSalonController::class, 'getCoiffeursAvecStatut']);
+Route::get('salons/{id_coiffeur}', [ApiSalonController::class, 'getProfilCoiffeur']);
+
 Route::prefix('reservations')->group(function () {
     Route::get('/user/{id}', [ApiReservationsController::class, 'getReservationByUser']);
     Route::post('/', [ApiReservationsController::class, 'store']);
@@ -70,12 +74,13 @@ Route::prefix('reservations')->group(function () {
 
     Route::get('/populaires/{id_coiffeur}', [ApiReservationsController::class, 'topServices']);
 });
-Route::prefix('paiements')->group(function () {
+Route::prefix('paiements')->group(function () { 
     Route::get('/user/{id_utilisateur}', [ApiPaiementsController::class, 'getPaiementByUser']);
     Route::post('/', [ApiPaiementsController::class, 'store']);
     Route::put('/{id_paiement}', [ApiPaiementsController::class, 'update']);
     Route::delete('/{id_paiement}', [ApiPaiementsController::class, 'destroy']);
 });
+Route::post('/stripe/webhook', [ApiPaiementsController::class, 'stripeWebhook']);
 Route::prefix('gains-coiffeuses')->group(function () {
     Route::get('/user/{id_utilisateur}', [ApiGainsCoiffeuseController::class, 'getGainsByUser']);
     Route::post('/', [ApiGainsCoiffeuseController::class, 'store']);
