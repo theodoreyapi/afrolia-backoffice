@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AboutController;
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ConfigTarifController;
 use App\Http\Controllers\CustomAuthController;
 use App\Http\Controllers\HairController;
@@ -89,3 +90,4 @@ Route::get('payment-gateway', function () {
 Route::get('siteweb', function () {
     return view('welcome');
 });
+Route::resource('company', CompanyController::class);

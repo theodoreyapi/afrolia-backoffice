@@ -26,6 +26,7 @@ Route::post('otp', [ApiUtilisateursController::class, 'demanderOtpReset']);
 Route::post('reset', [ApiUtilisateursController::class, 'resetPasswordWithOtp']);
 Route::post('update/{id}', [ApiUtilisateursController::class, 'update']);
 Route::delete('delete/{id}', [ApiUtilisateursController::class, 'supprimerCompte']);
+Route::get('delete/{id}', [ApiUtilisateursController::class, 'supprimerCompte']);
 
 // Confidentialite
 Route::get('help', [ApiSecurityController::class, 'helps']);
@@ -74,7 +75,7 @@ Route::prefix('reservations')->group(function () {
 
     Route::get('/populaires/{id_coiffeur}', [ApiReservationsController::class, 'topServices']);
 });
-Route::prefix('paiements')->group(function () { 
+Route::prefix('paiements')->group(function () {
     Route::get('/user/{id_utilisateur}', [ApiPaiementsController::class, 'getPaiementByUser']);
     Route::post('/', [ApiPaiementsController::class, 'store']);
     Route::put('/{id_paiement}', [ApiPaiementsController::class, 'update']);
