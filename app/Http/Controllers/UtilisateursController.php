@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\UsersApp;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UtilisateursController extends Controller
 {
@@ -17,7 +20,18 @@ class UtilisateursController extends Controller
             return redirect()->intended('index');
         }
 
-        $users = UsersApp::where('role', 'user')->get();
+        $users = UsersApp::where('role', 'user')
+            ->withCount([
+                'reservationsClient as reservations_count',
+            ])
+            ->withSum([
+                'reservationsClient as total_depenses' => function ($query) {
+                    $query->where('statut_paiement', 'paye');
+                },
+            ], 'montant_total')
+            ->latest()
+            ->get();
+
         return view('users.users-list', compact('users'));
     }
 
@@ -34,26 +48,46 @@ class UtilisateursController extends Controller
      */
     public function store(Request $request)
     {
-        $roles = [
-            'libelle' => 'required|unique:categories,libelle_categorie',
-            'illustre' => 'required',
+        $rules = [
+            'nom'       => 'required|string|max:255',
+            'prenom'    => 'required|string|max:100',
+            'telephone' => 'required|string|max:100|unique:users_app,phone',
+            'email'     => 'nullable|email|max:100|unique:users_app,email',
+            'commune'   => 'nullable|string|max:100',
+            'photo'     => 'nullable|image|max:2048',
         ];
+
         $customMessages = [
-            'libelle.unique' => $request->libelle . " existe déjà. Veuillez essayer une autre.",
-            'libelle.required' => "Veuillez saisir le libelle de la catégorie.",
-            'illustre.required' => "Veuillez saisir l'icone de la catégorie.",
+            'nom.required'       => 'Veuillez saisir le nom du client.',
+            'prenom.required'    => 'Veuillez saisir le prénom du client.',
+            'telephone.required' => 'Veuillez saisir le téléphone du client.',
+            'telephone.unique'   => 'Ce numéro de téléphone est déjà utilisé.',
+            'email.email'        => "L'adresse e-mail n'est pas valide.",
+            'email.unique'       => 'Cette adresse e-mail est déjà utilisée.',
         ];
 
-        $request->validate($roles, $customMessages);
+        $request->validate($rules, $customMessages);
 
-        $porte = new Categories();
-        $porte->icon_categorie = $request->illustre;
-        $porte->libelle_categorie = $request->libelle;
-        if ($porte->save()) {
-            return back()->with('succes',  "Vous avez ajouter " . $request->libelle);
-        } else {
-            return back()->withErrors(["Impossible d'ajouter " . $request->libelle . ". Veuillez réessayer!!"]);
+        $user = new UsersApp();
+        $user->last_name = $request->nom;
+        $user->name       = $request->prenom;
+        $user->phone      = $request->telephone;
+        $user->email      = $request->email;
+        $user->commune    = $request->commune;
+        $user->role       = 'user';
+        $user->statut     = 'Active';
+        // Mot de passe temporaire — à faire choisir/réinitialiser par le client via OTP
+        $user->password   = Hash::make(str()->random(12));
+
+        if ($request->hasFile('photo')) {
+            $user->photo = $request->file('photo')->store('users', 'public');
         }
+
+        if ($user->save()) {
+            return back()->with('succes', "Vous avez ajouté {$request->prenom} {$request->nom}.");
+        }
+
+        return back()->withErrors(["Impossible d'ajouter {$request->prenom} {$request->nom}. Veuillez réessayer."]);
     }
 
     /**
@@ -61,7 +95,54 @@ class UtilisateursController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $user = UsersApp::where('role', 'user')
+            ->withCount(['reservationsClient as reservations_count'])
+            ->withSum([
+                'reservationsClient as total_depenses' => function ($query) {
+                    $query->where('statut_paiement', 'paye');
+                },
+            ], 'montant_total')
+            ->findOrFail($id);
+
+        $reservations = DB::table('reservations')
+            ->join('users_app as coiffeurs', 'reservations.id_coiffeur', '=', 'coiffeurs.id_user_app')
+            ->join('services', 'reservations.id_service', '=', 'services.id_service')
+            ->join('specialites', 'services.id_speciale', '=', 'specialites.id_specialite')
+            ->where('reservations.id_client', $id)
+            ->select(
+                'reservations.*',
+                'coiffeurs.name as coiffeur_prenom',
+                'coiffeurs.last_name as coiffeur_nom',
+                'specialites.libelle as service_libelle',
+                'services.prix as service_prix',
+                'services.minute as service_duree'
+            )
+            ->orderByDesc('reservations.date_reservation')
+            ->orderByDesc('reservations.heure_reservation')
+            ->get();
+
+        $reviews = DB::table('reviews')
+            ->join('users_app as stylists', 'reviews.id_stylist', '=', 'stylists.id_user_app')
+            ->where('reviews.id_client', $id)
+            ->select('reviews.*', 'stylists.name as stylist_prenom', 'stylists.last_name as stylist_nom')
+            ->orderByDesc('reviews.created_at')
+            ->get();
+
+        $favoritesCount = DB::table('client_favorites')
+            ->where('client_id', $id)
+            ->count();
+
+        $avgRatingGiven = DB::table('reviews')
+            ->where('id_client', $id)
+            ->avg('rating');
+
+        return view('users.view-profile', compact(
+            'user',
+            'reservations',
+            'reviews',
+            'favoritesCount',
+            'avgRatingGiven'
+        ));
     }
 
     /**
@@ -77,33 +158,78 @@ class UtilisateursController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $porte = Categories::findOrFail($id);
+        $user = UsersApp::where('role', 'user')->findOrFail($id);
 
-        $roles = [
-            'libelle' => 'required',
-            'illustre' => 'required',
+        $rules = [
+            'nom'       => 'required|string|max:255',
+            'prenom'    => 'required|string|max:100',
+            'telephone' => 'required|string|max:100|unique:users_app,phone,' . $id . ',id_user_app',
+            'email'     => 'nullable|email|max:100|unique:users_app,email,' . $id . ',id_user_app',
+            'commune'   => 'nullable|string|max:100',
+            'photo'     => 'nullable|image|max:2048',
         ];
+
         $customMessages = [
-            'libelle.required' => "Veuillez saisir le libelle de la catégorie.",
-            'illustre.required' => "Veuillez saisir l'icone de la catégorie.",
+            'nom.required'       => 'Veuillez saisir le nom du client.',
+            'prenom.required'    => 'Veuillez saisir le prénom du client.',
+            'telephone.required' => 'Veuillez saisir le téléphone du client.',
+            'telephone.unique'   => 'Ce numéro de téléphone est déjà utilisé.',
+            'email.email'        => "L'adresse e-mail n'est pas valide.",
+            'email.unique'       => 'Cette adresse e-mail est déjà utilisée.',
         ];
 
-        $request->validate($roles, $customMessages);
+        $request->validate($rules, $customMessages);
 
-        if ($porte->libelle_categorie !== $request->libelle) {
-            $porte->libelle_categorie = $request->libelle;
-        }
-        if ($porte->statut_categorie !== $request->statut) {
-            $porte->statut_categorie = $request->statut;
+        $user->last_name = $request->nom;
+        $user->name       = $request->prenom;
+        $user->phone      = $request->telephone;
+        $user->email      = $request->email;
+        $user->commune    = $request->commune;
+
+        if ($request->hasFile('photo')) {
+            if ($user->photo) {
+                Storage::disk('public')->delete($user->photo);
+            }
+            $user->photo = $request->file('photo')->store('users', 'public');
         }
 
-        $porte->icon_categorie = $request->illustre;
-
-        if ($porte->save()) {
-            return back()->with('succes', "Vous avez modifier avec succès.");
-        } else {
-            return back()->withErrors(["Problème lors de la modification. Veuillez réessayer!!"]);
+        if ($user->save()) {
+            return back()->with('succes', 'Le client a été modifié avec succès.');
         }
+
+        return back()->withErrors(['Problème lors de la modification. Veuillez réessayer.']);
+    }
+
+    /**
+     * Suspendre un client.
+     */
+    public function suspend(Request $request, string $id)
+    {
+        $request->validate([
+            'raison' => 'required|string|max:500',
+        ], [
+            'raison.required' => 'Veuillez indiquer la raison de la suspension.',
+        ]);
+
+        $user = UsersApp::where('role', 'user')->findOrFail($id);
+        $user->statut = 'Inactive';
+        $user->raison_suspension = $request->raison;
+        $user->save();
+
+        return back()->with('succes', 'Le client a été suspendu.');
+    }
+
+    /**
+     * Réactiver un client.
+     */
+    public function reactivate(string $id)
+    {
+        $user = UsersApp::where('role', 'user')->findOrFail($id);
+        $user->statut = 'Active';
+        $user->raison_suspension = null;
+        $user->save();
+
+        return back()->with('succes', 'Le client a été réactivé.');
     }
 
     /**
@@ -111,8 +237,14 @@ class UtilisateursController extends Controller
      */
     public function destroy(string $id)
     {
-        Categories::findOrFail($id)->delete();
+        $user = UsersApp::where('role', 'user')->findOrFail($id);
 
-        return back()->with('succes', "La suppression a été effectué");
+        if ($user->photo) {
+            Storage::disk('public')->delete($user->photo);
+        }
+
+        $user->delete();
+
+        return back()->with('succes', 'La suppression a été effectuée.');
     }
 }

@@ -22,9 +22,44 @@
             </ul>
         </div>
 
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="fw-medium text-primary-light mb-1">Réussis</p>
+                        <h6 class="mb-0 text-success">{{ $succeeded }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="fw-medium text-primary-light mb-1">En attente</p>
+                        <h6 class="mb-0 text-warning">{{ $pending }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="fw-medium text-primary-light mb-1">Échoués</p>
+                        <h6 class="mb-0 text-danger">{{ $failed }}</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="fw-medium text-primary-light mb-1">Remboursés</p>
+                        <h6 class="mb-0 text-info">{{ $refunded }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br>
+
         <div class="card h-100 p-0 radius-12">
-            <div
-                class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                 <div class="d-flex align-items-center flex-wrap gap-3">
                     <select class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
                         <option>Status</option>
@@ -47,41 +82,71 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <strong>#OM240318001</strong>
-                                    <br>
-                                    18/03/2024 • Stripe
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src=" url($item->photo) ? $item->photo : url($item->photo)" alt=""
-                                            class="flex-shrink-0 me-12 radius-8">
-                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">
-                                            Yapi n'guessan kouassi theodore
-                                            <br>
-                                            +2250585831647
-                                        </h6>
-                                    </div>
-                                </td>
-                                <td>
-                                    <h6 style="color: red">38 000 CFA</h6>
-                                    <em style="color: green">Commission : 5 700 CFA</em>
-                                </td>
-                                <td>
-                                    <span
-                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Terminé</span>
-                                    <span
-                                        class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">Échoué</span>
-                                </td>
-                                <td>
-                                    <div class="alert alert-danger alert-dismissible fade show">
-                                        Échec: Compte inactif
-                                    </div>
-                                </td>
-                            </tr>
-                            @foreach ($remboursement as $item)
-                            @endforeach
+                            @forelse ($paiements as $item)
+                                <tr>
+                                    <td>
+                                        <strong>#{{ $item->numero_reservation }}</strong>
+                                        <br>
+                                        {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y') }} •
+                                        {{ ucfirst(str_replace('_', ' ', $item->payment_method)) }}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img height="48" width="48"
+                                                src="{{ $item->coiffeuse_photo ? asset('storage/'.$item->coiffeuse_photo) : asset('assets/images/user-default.png') }}"
+                                                alt="" class="flex-shrink-0 me-12 radius-8">
+                                            <h6 class="text-md mb-0 fw-medium flex-grow-1">
+                                                {{ $item->coiffeuse_prenom }} {{ $item->coiffeuse_nom }}
+                                                <br>
+                                                {{ $item->coiffeuse_phone }}
+                                            </h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h6 style="color: red">{{ number_format($item->prix_service, 0, ',', ' ') }} CFA</h6>
+                                        <em style="color: green">Commission : {{ number_format($item->montant_commission, 0, ',', ' ') }} CFA</em>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $statusColors = [
+                                                'succeeded'  => 'success',
+                                                'failed'     => 'danger',
+                                                'pending'    => 'warning',
+                                                'processing' => 'info',
+                                                'cancelled'  => 'secondary',
+                                                'refunded'   => 'info',
+                                            ];
+                                            $color = $statusColors[$item->status] ?? 'secondary';
+                                            $labels = [
+                                                'succeeded'  => 'Terminé',
+                                                'failed'     => 'Échoué',
+                                                'pending'    => 'En attente',
+                                                'processing' => 'En cours',
+                                                'cancelled'  => 'Annulé',
+                                                'refunded'   => 'Remboursé',
+                                            ];
+                                        @endphp
+                                        <span class="bg-{{ $color }}-focus text-{{ $color }}-main px-24 py-4 rounded-pill fw-medium text-sm">
+                                            {{ $labels[$item->status] ?? ucfirst($item->status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($item->status === 'failed' && $item->failure_reason)
+                                            <div class="alert alert-danger alert-dismissible fade show">
+                                                Échec: {{ $item->failure_reason }}
+                                            </div>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center py-40 text-secondary-light">
+                                        Aucun paiement pour le moment.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

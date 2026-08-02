@@ -2,8 +2,6 @@
  <script src="{{ URL::asset('') }}assets/js/lib/jquery-3.7.1.min.js"></script>
  <!-- Bootstrap js -->
  <script src="{{ URL::asset('') }}assets/js/lib/bootstrap.bundle.min.js"></script>
- <!-- Apex Chart js -->
- <script src="{{ URL::asset('') }}assets/js/lib/apexcharts.min.js"></script>
  <!-- Data Table js -->
  <script src="{{ URL::asset('') }}assets/js/lib/dataTables.min.js"></script>
  <!-- Iconify Font js -->
@@ -19,7 +17,9 @@
  <script src="{{ URL::asset('') }}assets/js/lib/slick.min.js"></script>
  <!-- main js -->
  <script src="{{ URL::asset('') }}assets/js/app.js"></script>
+ <!-- Apex Chart js -->
+ <script src="{{ URL::asset('') }}assets/js/lib/apexcharts.min.js"></script>
 
- <script src="{{ URL::asset('') }}assets/js/homeOneChart.js"></script>
+ {{-- <script src="{{ URL::asset('') }}assets/js/homeOneChart.js"></script> --}}
 
  @stack('scripts')

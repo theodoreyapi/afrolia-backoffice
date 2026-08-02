@@ -5,10 +5,13 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ConfigTarifController;
 use App\Http\Controllers\CustomAuthController;
 use App\Http\Controllers\HairController;
+use App\Http\Controllers\LitigeController;
 use App\Http\Controllers\PaiementController;
 use App\Http\Controllers\PolitiqueController;
+use App\Http\Controllers\RapportController;
 use App\Http\Controllers\RemboursementController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\TarifController;
 use App\Http\Controllers\TermsController;
 use App\Http\Controllers\UtilisateursController;
 use Illuminate\Support\Facades\Auth;
@@ -29,16 +32,24 @@ Route::get('/', function () {
 Route::get('sign-up', function () {
     return view('auth.sign-up');
 });
-Route::get('sign-up', function () {
-    return view('auth.sign-up');
-});
 Route::get('forgot', function () {
     return view('auth.forgot-password');
 });
 
 // utilisateurs
 Route::resource('users', UtilisateursController::class);
+Route::post('users/{id}/suspend', [UtilisateursController::class, 'suspend'])->name('users.suspend');
+Route::post('users/{id}/reactivate', [UtilisateursController::class, 'reactivate'])->name('users.reactivate');
+
 Route::resource('hair', HairController::class);
+// Route::get('hair', [HairController::class, 'index'])->name('hair.index');
+Route::post('hair', [HairController::class, 'store'])->name('hair.store');
+Route::get('hair/{id}', [HairController::class, 'show'])->name('hair.show');
+Route::put('hair/{id}', [HairController::class, 'update'])->name('hair.update');
+Route::delete('hair/{id}', [HairController::class, 'destroy'])->name('hair.destroy');
+Route::post('hair/{id}/suspend', [HairController::class, 'suspend'])->name('hair.suspend');
+Route::post('hair/{id}/reactivate', [HairController::class, 'reactivate'])->name('hair.reactivate');
+
 Route::resource('evenement', ReservationController::class);
 Route::get('user-add', function () {
     return view('users.add-user');
@@ -66,8 +77,26 @@ Route::get('pharmacies', function () {
 
 // Finance
 Route::resource('publicite', PaiementController::class);
+
 Route::resource('remboursement', RemboursementController::class);
-Route::resource('tarifs', ConfigTarifController::class);
+Route::post('remboursements/{id}/traiter', [RemboursementController::class, 'traiter'])->name('remboursements.traiter');
+Route::post('remboursements/{id}/rejeter', [RemboursementController::class, 'rejeter'])->name('remboursements.rejeter');
+
+// Tarifs
+Route::get('tarifs', [TarifController::class, 'index'])->name('tarifs');
+Route::post('tarifs', [TarifController::class, 'update'])->name('tarifs.update');
+
+// Rapports
+Route::get('rapport-financier', [RapportController::class, 'financier'])->name('rapport-financier');
+Route::get('stats-utilisateurs', [RapportController::class, 'utilisateurs'])->name('stats-utilisateurs');
+Route::get('performances-reservations', [RapportController::class, 'reservations'])->name('performances-reservations');
+Route::get('satisfaction-client', [RapportController::class, 'satisfaction'])->name('satisfaction-client');
+
+// Litiges
+Route::get('litiges', [LitigeController::class, 'index'])->name('litiges');
+Route::post('litiges/{id}/resoudre', [LitigeController::class, 'resoudre'])->name('litiges.resoudre');
+Route::post('litiges/{id}/rejeter', [LitigeController::class, 'rejeter'])->name('litiges.rejeter');
+Route::post('litiges/{id}/en-cours', [LitigeController::class, 'enCours'])->name('litiges.en-cours');
 
 // termes
 Route::resource('terms-condition', TermsController::class);

@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('password', 255);
             $table->string('role', 50)->comment('hair, user')->default('user');
             $table->string('statut', 50)->comment('Active, Inactive')->default('Active');
+            $table->text('raison_suspension')->nullable();
             $table->timestamps();
         });
     }

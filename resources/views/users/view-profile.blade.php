@@ -1,22 +1,7 @@
-@extends('layouts.master', ['title' => 'Profil de l\'utilisateur'])
+@extends('layouts.master', ['title' => 'Profil du client'])
 
 @push('scripts')
     <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    $('#imagePreview').css('background-image', 'url(' + e.target.result + ')');
-                    $('#imagePreview').hide();
-                    $('#imagePreview').fadeIn(650);
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-        $("#imageUpload").change(function() {
-            readURL(this);
-        });
-
         function initializePasswordToggle(toggleSelector) {
             $(toggleSelector).on('click', function() {
                 $(this).toggleClass("ri-eye-off-line");
@@ -28,7 +13,6 @@
                 }
             });
         }
-        // Call the function
         initializePasswordToggle('.toggle-password');
     </script>
 @endpush
@@ -36,13 +20,17 @@
 @section('content')
     <div class="dashboard-main-body">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
-            <h6 class="fw-semibold mb-0">Profil utilisateur</h6>
+            <h6 class="fw-semibold mb-0">Profil du client</h6>
             <ul class="d-flex align-items-center gap-2">
                 <li class="fw-medium">
-                    <a href="index" class="d-flex align-items-center gap-1 hover-text-primary">
+                    <a href="{{ url('index') }}" class="d-flex align-items-center gap-1 hover-text-primary">
                         <iconify-icon icon="solar:home-smile-angle-outline" class="icon text-lg"></iconify-icon>
                         Tableau de bord
                     </a>
+                </li>
+                <li>-</li>
+                <li class="fw-medium">
+                    <a href="{{ route('users.index') }}" class="hover-text-primary">Clients</a>
                 </li>
                 <li>-</li>
                 <li class="fw-medium">Profil</li>
@@ -50,273 +38,263 @@
         </div>
 
         <div class="row gy-4">
+            {{-- ── Carte identité ────────────────────────────────────────── --}}
             <div class="col-lg-4">
                 <div class="user-grid-card position-relative border radius-16 overflow-hidden bg-base h-100">
-                    <img src="assets/images/user-grid/user-grid-bg1.png" alt="" class="w-100 object-fit-cover">
-                    <div class="pb-24 ms-16 mb-24 me-16  mt--100">
+                    <img src="{{ asset('assets/images/user-grid/user-grid-bg1.png') }}" alt=""
+                        class="w-100 object-fit-cover">
+                    <div class="pb-24 ms-16 mb-24 me-16 mt--100">
                         <div class="text-center border border-top-0 border-start-0 border-end-0">
-                            <img src="assets/images/user-grid/user-grid-img14.png" alt=""
+                            <img src="{{ $user->photo ? asset('storage/' . $user->photo) : asset('assets/images/user-grid/user-grid-img14.png') }}"
+                                alt=""
                                 class="border br-white border-width-2-px w-200-px h-200-px rounded-circle object-fit-cover">
-                            <h6 class="mb-0 mt-16">Jacob Jones</h6>
-                            <span class="text-secondary-light mb-16">ifrandom@gmail.com</span>
+                            <h6 class="mb-0 mt-16">{{ $user->last_name }} {{ $user->name }}</h6>
+                            <span class="text-secondary-light mb-16">{{ $user->email ?? 'Aucun e-mail renseigné' }}</span>
+                            <div class="mt-8">
+                                @if ($user->statut === 'Active')
+                                    <span
+                                        class="bg-success-focus text-success-main px-16 py-4 rounded-pill fw-medium text-sm">Active</span>
+                                @else
+                                    <span
+                                        class="bg-danger-focus text-danger-main px-16 py-4 rounded-pill fw-medium text-sm">Suspendu</span>
+                                @endif
+                            </div>
                         </div>
+
                         <div class="mt-24">
-                            <h6 class="text-xl mb-16">Personal Info</h6>
+                            <h6 class="text-xl mb-16">Informations personnelles</h6>
                             <ul>
                                 <li class="d-flex align-items-center gap-1 mb-12">
-                                    <span class="w-30 text-md fw-semibold text-primary-light">Full Name</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: Will Jonto</span>
+                                    <span class="w-30 text-md fw-semibold text-primary-light">Nom complet</span>
+                                    <span class="w-70 text-secondary-light fw-medium">: {{ $user->last_name }}
+                                        {{ $user->name }}</span>
                                 </li>
                                 <li class="d-flex align-items-center gap-1 mb-12">
-                                    <span class="w-30 text-md fw-semibold text-primary-light"> Email</span>
+                                    <span class="w-30 text-md fw-semibold text-primary-light">E-mail</span>
+                                    <span class="w-70 text-secondary-light fw-medium">: {{ $user->email ?? '—' }}</span>
+                                </li>
+                                <li class="d-flex align-items-center gap-1 mb-12">
+                                    <span class="w-30 text-md fw-semibold text-primary-light">Téléphone</span>
+                                    <span class="w-70 text-secondary-light fw-medium">: {{ $user->phone }}</span>
+                                </li>
+                                <li class="d-flex align-items-center gap-1 mb-12">
+                                    <span class="w-30 text-md fw-semibold text-primary-light">Commune</span>
+                                    <span class="w-70 text-secondary-light fw-medium">: {{ $user->commune ?? '—' }}</span>
+                                </li>
+                                <li class="d-flex align-items-center gap-1 mb-12">
+                                    <span class="w-30 text-md fw-semibold text-primary-light">Adresse</span>
+                                    <span class="w-70 text-secondary-light fw-medium">: {{ $user->adresse ?? '—' }}</span>
+                                </li>
+                                <li class="d-flex align-items-center gap-1 mb-12">
+                                    <span class="w-30 text-md fw-semibold text-primary-light">Inscrit le</span>
                                     <span class="w-70 text-secondary-light fw-medium">:
-                                        willjontoax@gmail.com</span>
+                                        {{ $user->created_at->format('d/m/Y') }}</span>
                                 </li>
-                                <li class="d-flex align-items-center gap-1 mb-12">
-                                    <span class="w-30 text-md fw-semibold text-primary-light"> Phone Number</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: (1) 2536 2561 2365</span>
-                                </li>
-                                <li class="d-flex align-items-center gap-1 mb-12">
-                                    <span class="w-30 text-md fw-semibold text-primary-light"> Department</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: Design</span>
-                                </li>
-                                <li class="d-flex align-items-center gap-1 mb-12">
-                                    <span class="w-30 text-md fw-semibold text-primary-light"> Designation</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: UI UX Designer</span>
-                                </li>
-                                <li class="d-flex align-items-center gap-1 mb-12">
-                                    <span class="w-30 text-md fw-semibold text-primary-light"> Languages</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: English</span>
-                                </li>
-                                <li class="d-flex align-items-center gap-1">
-                                    <span class="w-30 text-md fw-semibold text-primary-light"> Bio</span>
-                                    <span class="w-70 text-secondary-light fw-medium">: Lorem Ipsum is simply dummy
-                                        text of the printing and typesetting industry.</span>
-                                </li>
+                                @if ($user->statut !== 'Active' && $user->raison_suspension)
+                                    <li class="d-flex align-items-center gap-1">
+                                        <span class="w-30 text-md fw-semibold text-primary-light">Raison</span>
+                                        <span class="w-70 text-danger-main fw-medium">:
+                                            {{ $user->raison_suspension }}</span>
+                                    </li>
+                                @endif
                             </ul>
+                        </div>
+
+                        {{-- ── Statistiques rapides ──────────────────────────────── --}}
+                        <div class="mt-24">
+                            <h6 class="text-xl mb-16">Statistiques</h6>
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="border radius-8 p-16 text-center">
+                                        <h6 class="mb-0 text-primary-600">{{ $user->reservations_count }}</h6>
+                                        <span class="text-secondary-light text-sm">Réservations</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border radius-8 p-16 text-center">
+                                        <h6 class="mb-0 text-success-main">
+                                            {{ number_format($user->total_depenses ?? 0, 0, ',', ' ') }} F</h6>
+                                        <span class="text-secondary-light text-sm">Dépensé</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border radius-8 p-16 text-center">
+                                        <h6 class="mb-0 text-warning-main">
+                                            {{ $avgRatingGiven ? number_format($avgRatingGiven, 1) : '—' }}
+                                            @if ($avgRatingGiven)
+                                                <iconify-icon icon="solar:star-bold"
+                                                    class="text-warning-main"></iconify-icon>
+                                            @endif
+                                        </h6>
+                                        <span class="text-secondary-light text-sm">Note moy. donnée</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border radius-8 p-16 text-center">
+                                        <h6 class="mb-0 text-danger-main">{{ $favoritesCount }}</h6>
+                                        <span class="text-secondary-light text-sm">Favoris</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            {{-- ── Onglets : réservations / avis ────────────────────────────── --}}
             <div class="col-lg-8">
                 <div class="card h-100">
                     <div class="card-body p-24">
                         <ul class="nav border-gradient-tab nav-pills mb-20 d-inline-flex" id="pills-tab" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link d-flex align-items-center px-24 active" id="pills-edit-profile-tab"
-                                    data-bs-toggle="pill" data-bs-target="#pills-edit-profile" type="button" role="tab"
-                                    aria-controls="pills-edit-profile" aria-selected="true">
-                                    Edit Profile
+                                <button class="nav-link d-flex align-items-center px-24 active" id="pills-reservations-tab"
+                                    data-bs-toggle="pill" data-bs-target="#pills-reservations" type="button" role="tab"
+                                    aria-controls="pills-reservations" aria-selected="true">
+                                    Réservations ({{ $reservations->count() }})
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link d-flex align-items-center px-24" id="pills-change-passwork-tab"
-                                    data-bs-toggle="pill" data-bs-target="#pills-change-passwork" type="button"
-                                    role="tab" aria-controls="pills-change-passwork" aria-selected="false"
-                                    tabindex="-1">
-                                    Change Password
-                                </button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link d-flex align-items-center px-24" id="pills-notification-tab"
-                                    data-bs-toggle="pill" data-bs-target="#pills-notification" type="button" role="tab"
-                                    aria-controls="pills-notification" aria-selected="false" tabindex="-1">
-                                    Notification Settings
+                                <button class="nav-link d-flex align-items-center px-24" id="pills-avis-tab"
+                                    data-bs-toggle="pill" data-bs-target="#pills-avis" type="button" role="tab"
+                                    aria-controls="pills-avis" aria-selected="false" tabindex="-1">
+                                    Avis laissés ({{ $reviews->count() }})
                                 </button>
                             </li>
                         </ul>
 
                         <div class="tab-content" id="pills-tabContent">
-                            <div class="tab-pane fade show active" id="pills-edit-profile" role="tabpanel"
-                                aria-labelledby="pills-edit-profile-tab" tabindex="0">
-                                <h6 class="text-md text-primary-light mb-16">Profile Image</h6>
-                                <!-- Upload Image Start -->
-                                <div class="mb-24 mt-16">
-                                    <div class="avatar-upload">
-                                        <div
-                                            class="avatar-edit position-absolute bottom-0 end-0 me-24 mt-16 z-1 cursor-pointer">
-                                            <input type='file' id="imageUpload" accept=".png, .jpg, .jpeg" hidden>
-                                            <label for="imageUpload"
-                                                class="w-32-px h-32-px d-flex justify-content-center align-items-center bg-primary-50 text-primary-600 border border-primary-600 bg-hover-primary-100 text-lg rounded-circle">
-                                                <iconify-icon icon="solar:camera-outline" class="icon"></iconify-icon>
-                                            </label>
-                                        </div>
-                                        <div class="avatar-preview">
-                                            <div id="imagePreview">
-                                            </div>
-                                        </div>
+                            {{-- ── Réservations ────────────────────────────────── --}}
+                            <div class="tab-pane fade show active" id="pills-reservations" role="tabpanel"
+                                aria-labelledby="pills-reservations-tab" tabindex="0">
+                                @if ($reservations->isEmpty())
+                                    <p class="text-secondary-light text-center py-40">Aucune réservation pour ce client.
+                                    </p>
+                                @else
+                                    <div class="table-responsive scroll-sm">
+                                        <table class="table bordered-table mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>N° réservation</th>
+                                                    <th>Coiffeur</th>
+                                                    <th>Service</th>
+                                                    <th>Date</th>
+                                                    <th>Prix service</th>
+                                                    <th>Montant</th>
+                                                    <th>Statut</th>
+                                                    <th>Paiement</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach ($reservations as $r)
+                                                    <tr>
+                                                        <td>{{ $r->numero_reservation }}</td>
+                                                        <td>{{ $r->coiffeur_prenom }} {{ $r->coiffeur_nom }}</td>
+                                                        <td>
+                                                            {{ $r->service_libelle }}
+                                                            <br>
+                                                            <span
+                                                                class="text-secondary-light text-sm">{{ $r->service_duree }}
+                                                                min</span>
+                                                        </td>
+                                                        <td>
+                                                            {{ \Carbon\Carbon::parse($r->date_reservation)->format('d/m/Y') }}
+                                                            {{ \Carbon\Carbon::parse($r->heure_reservation)->format('H:i') }}
+                                                        </td>
+                                                        <td>{{ number_format($r->service_prix, 0, ',', ' ') }} F</td>
+                                                        <td>{{ number_format($r->montant_total, 0, ',', ' ') }} F</td>
+                                                        <td>
+                                                            @php
+                                                                $statutColors = [
+                                                                    'en_attente' => 'warning',
+                                                                    'confirmee' => 'info',
+                                                                    'en_cours' => 'primary',
+                                                                    'terminee' => 'success',
+                                                                    'annulee' => 'danger',
+                                                                    'no_show' => 'danger',
+                                                                ];
+                                                                $color = $statutColors[$r->statut] ?? 'secondary';
+                                                            @endphp
+                                                            <span
+                                                                class="bg-{{ $color }}-focus text-{{ $color }}-main px-16 py-4 rounded-pill fw-medium text-sm">
+                                                                {{ ucfirst(str_replace('_', ' ', $r->statut)) }}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            @if ($r->statut_paiement === 'paye')
+                                                                <span
+                                                                    class="bg-success-focus text-success-main px-16 py-4 rounded-pill fw-medium text-sm">Payé</span>
+                                                            @elseif($r->statut_paiement === 'echoue')
+                                                                <span
+                                                                    class="bg-danger-focus text-danger-main px-16 py-4 rounded-pill fw-medium text-sm">Échoué</span>
+                                                            @elseif($r->statut_paiement === 'rembourse')
+                                                                <span
+                                                                    class="bg-info-focus text-info-main px-16 py-4 rounded-pill fw-medium text-sm">Remboursé</span>
+                                                            @else
+                                                                <span
+                                                                    class="bg-warning-focus text-warning-main px-16 py-4 rounded-pill fw-medium text-sm">En
+                                                                    attente</span>
+                                                            @endif
+                                                        </td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
                                     </div>
-                                </div>
-                                <!-- Upload Image End -->
-                                <form action="#">
-                                    <div class="row">
-                                        <div class="col-sm-6">
-                                            <div class="mb-20">
-                                                <label for="name"
-                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">Full
-                                                    Name <span class="text-danger-600">*</span></label>
-                                                <input type="text" class="form-control radius-8" id="name"
-                                                    placeholder="Enter Full Name">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="mb-20">
-                                                <label for="email"
-                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">Email
-                                                    <span class="text-danger-600">*</span></label>
-                                                <input type="email" class="form-control radius-8" id="email"
-                                                    placeholder="Enter email address">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="mb-20">
-                                                <label for="number"
-                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">Phone</label>
-                                                <input type="email" class="form-control radius-8" id="number"
-                                                    placeholder="Enter phone number">
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="mb-20">
-                                                <label for="depart"
-                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">Department
-                                                    <span class="text-danger-600">*</span> </label>
-                                                <select class="form-control radius-8 form-select" id="depart">
-                                                    <option>Enter Event Title </option>
-                                                    <option>Enter Event Title One </option>
-                                                    <option>Enter Event Title Two</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="mb-20">
-                                                <label for="desig"
-                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">Designation
-                                                    <span class="text-danger-600">*</span> </label>
-                                                <select class="form-control radius-8 form-select" id="desig">
-                                                    <option>Enter Designation Title </option>
-                                                    <option>Enter Designation Title One </option>
-                                                    <option>Enter Designation Title Two</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-6">
-                                            <div class="mb-20">
-                                                <label for="Language"
-                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">Language
-                                                    <span class="text-danger-600">*</span> </label>
-                                                <select class="form-control radius-8 form-select" id="Language">
-                                                    <option> English</option>
-                                                    <option> Bangla </option>
-                                                    <option> Hindi</option>
-                                                    <option> Arabic</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-sm-12">
-                                            <div class="mb-20">
-                                                <label for="desc"
-                                                    class="form-label fw-semibold text-primary-light text-sm mb-8">Description</label>
-                                                <textarea name="#0" class="form-control radius-8" id="desc" placeholder="Write description..."></textarea>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-center justify-content-center gap-3">
-                                        <button type="button"
-                                            class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-56 py-11 radius-8">
-                                            Cancel
-                                        </button>
-                                        <button type="button"
-                                            class="btn btn-primary border border-primary-600 text-md px-56 py-12 radius-8">
-                                            Save
-                                        </button>
-                                    </div>
-                                </form>
+                                @endif
                             </div>
 
-                            <div class="tab-pane fade" id="pills-change-passwork" role="tabpanel"
-                                aria-labelledby="pills-change-passwork-tab" tabindex="0">
-                                <div class="mb-20">
-                                    <label for="your-password"
-                                        class="form-label fw-semibold text-primary-light text-sm mb-8">New Password
-                                        <span class="text-danger-600">*</span></label>
-                                    <div class="position-relative">
-                                        <input type="password" class="form-control radius-8" id="your-password"
-                                            placeholder="Enter New Password*">
-                                        <span
-                                            class="toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light"
-                                            data-toggle="#your-password"></span>
-                                    </div>
-                                </div>
-                                <div class="mb-20">
-                                    <label for="confirm-password"
-                                        class="form-label fw-semibold text-primary-light text-sm mb-8">Confirmed
-                                        Password <span class="text-danger-600">*</span></label>
-                                    <div class="position-relative">
-                                        <input type="password" class="form-control radius-8" id="confirm-password"
-                                            placeholder="Confirm Password*">
-                                        <span
-                                            class="toggle-password ri-eye-line cursor-pointer position-absolute end-0 top-50 translate-middle-y me-16 text-secondary-light"
-                                            data-toggle="#confirm-password"></span>
-                                    </div>
-                                </div>
+                            {{-- ── Avis laissés ────────────────────────────────── --}}
+                            <div class="tab-pane fade" id="pills-avis" role="tabpanel" aria-labelledby="pills-avis-tab"
+                                tabindex="0">
+                                @if ($reviews->isEmpty())
+                                    <p class="text-secondary-light text-center py-40">Ce client n'a laissé aucun avis.</p>
+                                @else
+                                    @foreach ($reviews as $review)
+                                        <div class="border radius-8 p-16 mb-12">
+                                            <div class="d-flex align-items-center justify-content-between mb-8">
+                                                <div>
+                                                    <h6 class="mb-0 text-md">
+                                                        @if ($review->is_anonymous)
+                                                            Avis anonyme
+                                                        @else
+                                                            Pour {{ $review->stylist_prenom }} {{ $review->stylist_nom }}
+                                                        @endif
+                                                    </h6>
+                                                    <span
+                                                        class="text-secondary-light text-sm">{{ \Carbon\Carbon::parse($review->created_at)->format('d/m/Y') }}</span>
+                                                </div>
+                                                <div>
+                                                    @for ($i = 1; $i <= 5; $i++)
+                                                        <iconify-icon
+                                                            icon="{{ $i <= $review->rating ? 'solar:star-bold' : 'solar:star-outline' }}"
+                                                            class="text-warning-main"></iconify-icon>
+                                                    @endfor
+                                                </div>
+                                            </div>
+                                            @if ($review->comment)
+                                                <p class="text-secondary-light mb-8">{{ $review->comment }}</p>
+                                            @endif
+                                            <div class="d-flex gap-2">
+                                                @if ($review->status === 'approved')
+                                                    <span
+                                                        class="bg-success-focus text-success-main px-12 py-2 rounded-pill text-xs fw-medium">Approuvé</span>
+                                                @elseif($review->status === 'pending')
+                                                    <span
+                                                        class="bg-warning-focus text-warning-main px-12 py-2 rounded-pill text-xs fw-medium">En
+                                                        attente</span>
+                                                @else
+                                                    <span
+                                                        class="bg-danger-focus text-danger-main px-12 py-2 rounded-pill text-xs fw-medium">Rejeté</span>
+                                                @endif
+                                                @if ($review->is_verified)
+                                                    <span
+                                                        class="bg-info-focus text-info-main px-12 py-2 rounded-pill text-xs fw-medium">Vérifié</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                @endif
                             </div>
-
-                            <div class="tab-pane fade" id="pills-notification" role="tabpanel"
-                                aria-labelledby="pills-notification-tab" tabindex="0">
-                                <div
-                                    class="form-switch switch-primary py-12 px-16 border radius-8 position-relative mb-16">
-                                    <label for="companzNew" class="position-absolute w-100 h-100 start-0 top-0"></label>
-                                    <div class="d-flex align-items-center gap-3 justify-content-between">
-                                        <span class="form-check-label line-height-1 fw-medium text-secondary-light">Company
-                                            News</span>
-                                        <input class="form-check-input" type="checkbox" role="switch" id="companzNew">
-                                    </div>
-                                </div>
-                                <div
-                                    class="form-switch switch-primary py-12 px-16 border radius-8 position-relative mb-16">
-                                    <label for="pushNotifcation"
-                                        class="position-absolute w-100 h-100 start-0 top-0"></label>
-                                    <div class="d-flex align-items-center gap-3 justify-content-between">
-                                        <span class="form-check-label line-height-1 fw-medium text-secondary-light">Push
-                                            Notification</span>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                            id="pushNotifcation" checked>
-                                    </div>
-                                </div>
-                                <div
-                                    class="form-switch switch-primary py-12 px-16 border radius-8 position-relative mb-16">
-                                    <label for="weeklyLetters"
-                                        class="position-absolute w-100 h-100 start-0 top-0"></label>
-                                    <div class="d-flex align-items-center gap-3 justify-content-between">
-                                        <span class="form-check-label line-height-1 fw-medium text-secondary-light">Weekly
-                                            News Letters</span>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                            id="weeklyLetters" checked>
-                                    </div>
-                                </div>
-                                <div
-                                    class="form-switch switch-primary py-12 px-16 border radius-8 position-relative mb-16">
-                                    <label for="meetUp" class="position-absolute w-100 h-100 start-0 top-0"></label>
-                                    <div class="d-flex align-items-center gap-3 justify-content-between">
-                                        <span class="form-check-label line-height-1 fw-medium text-secondary-light">Meetups
-                                            Near you</span>
-                                        <input class="form-check-input" type="checkbox" role="switch" id="meetUp">
-                                    </div>
-                                </div>
-                                <div
-                                    class="form-switch switch-primary py-12 px-16 border radius-8 position-relative mb-16">
-                                    <label for="orderNotification"
-                                        class="position-absolute w-100 h-100 start-0 top-0"></label>
-                                    <div class="d-flex align-items-center gap-3 justify-content-between">
-                                        <span class="form-check-label line-height-1 fw-medium text-secondary-light">Orders
-                                            Notifications</span>
-                                        <input class="form-check-input" type="checkbox" role="switch"
-                                            id="orderNotification" checked>
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
                 </div>

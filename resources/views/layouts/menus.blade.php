@@ -56,9 +56,10 @@
                             Réservations</a>
                     </li>
                     <li class="{{ Route::is('litiges') ? 'active-page' : '' }}">
-                        <a href="{{ url('litiges') }}" class="{{ Route::is('litiges') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
-                            Litiges & réclamations</a>
+                        <a href="{{ url('litiges') }}" class="{{ Route::is('litiges') ? 'active-page' : '' }}">
+                            <i class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
+                            Litiges & réclamations
+                        </a>
                     </li>
                 </ul>
             </li>
@@ -74,45 +75,54 @@
                             Paiements aux coiffeuses</a>
                     </li>
                     <li class="{{ Route::is('remboursement') ? 'active-page' : '' }}">
-                        <a href="{{ url('remboursement') }}" class="{{ Route::is('remboursement') ? 'active-page' : '' }}"><i
+                        <a href="{{ url('remboursement') }}"
+                            class="{{ Route::is('remboursement') ? 'active-page' : '' }}"><i
                                 class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
                             Remboursements</a>
                     </li>
                     <li class="{{ Route::is('tarifs') ? 'active-page' : '' }}">
-                        <a href="{{ url('tarifs') }}" class="{{ Route::is('tarifs') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
-                            Configuration des tarifs</a>
+                        <a href="{{ url('tarifs') }}" class="{{ Route::is('tarifs') ? 'active-page' : '' }}">
+                            <i class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
+                            Configuration des tarifs
+                        </a>
                     </li>
                 </ul>
             </li>
             <li
-                class="dropdown {{ Route::is('transaction', 'abonnement', 'utilisateur', 'pharmacies') ? 'open' : '' }}">
+                class="dropdown {{ Route::is('rapport-financier', 'stats-utilisateurs', 'performances-reservations', 'satisfaction-client') ? 'open' : '' }}">
                 <a href="javascript:void(0)">
                     <iconify-icon icon="fe:vector" class="menu-icon"></iconify-icon>
                     <span>Rapports</span>
                 </a>
                 <ul
-                    class="sidebar-submenu {{ Route::is('transaction', 'abonnement', 'utilisateur', 'pharmacies') ? 'show' : '' }}">
-                    <li class="{{ Route::is('transaction') ? 'active-page' : '' }}">
-                        <a href="transaction" class="{{ Route::is('transaction') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
+                    class="sidebar-submenu {{ Route::is('rapport-financier', 'stats-utilisateurs', 'performances-reservations', 'satisfaction-client') ? 'show' : '' }}">
+                    <li class="{{ Route::is('rapport-financier') ? 'active-page' : '' }}">
+                        <a href="{{ url('rapport-financier') }}"
+                            class="{{ Route::is('rapport-financier') ? 'active-page' : '' }}">
+                            <i class="ri-circle-fill circle-icon text-primary-600 w-auto"></i>
                             Rapport financier mensuel
                         </a>
                     </li>
-                    <li class="{{ Route::is('abonnement') ? 'active-page' : '' }}">
-                        <a href="abonnement" class="{{ Route::is('abonnement') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-warning-main w-auto"></i>
-                            Statistiques utilisateurs</a>
+                    <li class="{{ Route::is('stats-utilisateurs') ? 'active-page' : '' }}">
+                        <a href="{{ url('stats-utilisateurs') }}"
+                            class="{{ Route::is('stats-utilisateurs') ? 'active-page' : '' }}">
+                            <i class="ri-circle-fill circle-icon text-warning-main w-auto"></i>
+                            Statistiques utilisateurs
+                        </a>
                     </li>
-                    <li class="{{ Route::is('utilisateur') ? 'active-page' : '' }}">
-                        <a href="utilisateur" class="{{ Route::is('utilisateur') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-info-main w-auto"></i>
-                            Performances des réservations</a>
+                    <li class="{{ Route::is('performances-reservations') ? 'active-page' : '' }}">
+                        <a href="{{ url('performances-reservations') }}"
+                            class="{{ Route::is('performances-reservations') ? 'active-page' : '' }}">
+                            <i class="ri-circle-fill circle-icon text-info-main w-auto"></i>
+                            Performances des réservations
+                        </a>
                     </li>
-                    <li class="{{ Route::is('pharmacies') ? 'active-page' : '' }}">
-                        <a href="pharmacies" class="{{ Route::is('pharmacies') ? 'active-page' : '' }}"><i
-                                class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
-                            Satisfaction client</a>
+                    <li class="{{ Route::is('satisfaction-client') ? 'active-page' : '' }}">
+                        <a href="{{ url('satisfaction-client') }}"
+                            class="{{ Route::is('satisfaction-client') ? 'active-page' : '' }}">
+                            <i class="ri-circle-fill circle-icon text-danger-main w-auto"></i>
+                            Satisfaction client
+                        </a>
                     </li>
                 </ul>
             </li>

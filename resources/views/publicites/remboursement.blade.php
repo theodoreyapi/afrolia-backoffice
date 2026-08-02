@@ -34,8 +34,7 @@
         </div>
         <br>
         <div class="card h-100 p-0 radius-12">
-            <div
-                class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                 <div class="d-flex align-items-center flex-wrap gap-3">
                     <select class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
                         <option>Status</option>
@@ -60,145 +59,134 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <strong>#AR001567</strong>
-                                    <br>
-                                    Demandé le 20/03/2024 à 10:30
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src=" url($item->photo) ? $item->photo : url($item->photo)" alt=""
-                                            class="flex-shrink-0 me-12 radius-8">
-                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">
-                                            Yapi n'guessan kouassi theodore
-                                            <br>
-                                            +2250585831647
-                                        </h6>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src=" url($item->photo) ? $item->photo : url($item->photo)" alt=""
-                                            class="flex-shrink-0 me-12 radius-8">
-                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">
-                                            Yapi theodore
-                                            <br>
-                                            +2250585831648
-                                        </h6>
-                                    </div>
-                                </td>
-                                <td>
-                                    <h6 style="color: red">17 250 CFA</h6>
-                                    <em>Stripe</em>
-                                </td>
-                                <td>
-                                    <span
-                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Traité</span>
-                                    <span
-                                        class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">Rejeté</span>
-                                    <span
-                                        class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">En
-                                        attente</span>
-                                </td>
-                                <td>
-                                    <div class="alert alert-dark alert-dismissible fade show">
-                                        Urgence familiale
+                            @forelse ($remboursements as $item)
+                                <tr>
+                                    <td>
+                                        <strong>#{{ $item->numero_reservation }}</strong>
                                         <br>
-                                        Le 24/03/2024 à 16:30
-                                        <br>
-                                        par Client ou Coiffeuse
-                                    </div>
-                                </td>
-                                <td>
-                                    <a href="javascript:void(0)" title="Traiter"
-                                            class="btn bg-success-focus text-success-main d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#reactivateModal">
-                                            <iconify-icon icon="lucide:check"></iconify-icon> Traiter
-                                        </a>
-                                        <div class="modal fade" id="reactivateModal" tabindex="-1"
-                                            aria-labelledby="reactivateModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog modal-dialog-centered">
-                                                <div class="modal-content radius-16 bg-base">
-                                                    <div
-                                                        class="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0 bg-success-600">
-                                                        <h1 class="modal-title fs-5 text-white" id="reactivateModalLabel">
-                                                            Traiter
-                                                        </h1>
-                                                        <button type="button" class="btn-close"
-                                                            style="background-color: white" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body p-24">
-                                                        <form action="#">
-                                                            <div class="row">
-                                                                <p>
-                                                                    Êtes-vous sûr de vouloir traiter ce remboursement ?
-                                                                </p>
-                                                                <div
-                                                                    class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                                                                    <button type="reset" data-bs-dismiss="modal"
-                                                                        aria-label="Close"
-                                                                        class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
-                                                                        Annuler
-                                                                    </button>
-                                                                    <button type="submit"
-                                                                        class="btn btn-success border border-success-600 text-md px-50 py-12 radius-8">
-                                                                        Oui, Traiter
-                                                                    </button>
+                                        Demandé le {{ $item->annule_le ? \Carbon\Carbon::parse($item->annule_le)->format('d/m/Y à H:i') : '—' }}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img height="48" width="48"
+                                                src="{{ $item->client_photo ? asset('storage/'.$item->client_photo) : asset('assets/images/user-default.png') }}"
+                                                alt="" class="flex-shrink-0 me-12 radius-8">
+                                            <h6 class="text-md mb-0 fw-medium flex-grow-1">
+                                                {{ $item->client_prenom }} {{ $item->client_nom }}
+                                                <br>
+                                                {{ $item->client_phone }}
+                                            </h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img height="48" width="48"
+                                                src="{{ $item->coiffeuse_photo ? asset('storage/'.$item->coiffeuse_photo) : asset('assets/images/user-default.png') }}"
+                                                alt="" class="flex-shrink-0 me-12 radius-8">
+                                            <h6 class="text-md mb-0 fw-medium flex-grow-1">
+                                                {{ $item->coiffeuse_prenom }} {{ $item->coiffeuse_nom }}
+                                                <br>
+                                                {{ $item->coiffeuse_phone }}
+                                            </h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <h6 style="color: red">{{ number_format($item->prix_service, 0, ',', ' ') }} CFA</h6>
+                                        <em>{{ ucfirst(str_replace('_', ' ', $item->methode_paiement)) }}</em>
+                                    </td>
+                                    <td>
+                                        @if($item->statut_paiement === 'rembourse')
+                                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Traité</span>
+                                        @else
+                                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">En attente</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($item->raison_annulation)
+                                            <div class="alert alert-dark alert-dismissible fade show">
+                                                {{ $item->raison_annulation }}
+                                                @if($item->annule_le)
+                                                    <br>
+                                                    Le {{ \Carbon\Carbon::parse($item->annule_le)->format('d/m/Y à H:i') }}
+                                                @endif
+                                                @if($item->annule_par)
+                                                    <br>
+                                                    par {{ ucfirst($item->annule_par) }}
+                                                @endif
+                                            </div>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($item->statut_paiement === 'paye')
+                                            <a href="javascript:void(0)" title="Traiter"
+                                                class="btn bg-success-focus text-success-main d-inline-flex align-items-center justify-content-center"
+                                                data-bs-toggle="modal" data-bs-target="#traiterModal{{ $item->id_reservation }}">
+                                                <iconify-icon icon="lucide:check"></iconify-icon> Traiter
+                                            </a>
+                                            <div class="modal fade" id="traiterModal{{ $item->id_reservation }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content radius-16 bg-base">
+                                                        <div class="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0 bg-success-600">
+                                                            <h1 class="modal-title fs-5 text-white">Traiter</h1>
+                                                            <button type="button" class="btn-close" style="background-color: white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body p-24">
+                                                            <form action="{{ route('remboursements.traiter', $item->id_reservation) }}" method="POST">
+                                                                @csrf
+                                                                <p>Êtes-vous sûr de vouloir traiter ce remboursement de {{ number_format($item->prix_service, 0, ',', ' ') }} CFA ?</p>
+                                                                <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                                                                    <button type="reset" data-bs-dismiss="modal" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">Annuler</button>
+                                                                    <button type="submit" class="btn btn-success border border-success-600 text-md px-50 py-12 radius-8">Oui, Traiter</button>
                                                                 </div>
-                                                            </div>
-                                                        </form>
+                                                            </form>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <a href="javascript:void(0)" title="Rejeter"
-                                            class="btn bg-danger-focus text-danger-main d-inline-flex align-items-center justify-content-center"
-                                            data-bs-toggle="modal" data-bs-target="#suspendModal">
-                                            <iconify-icon icon="lucide:x"></iconify-icon> Rejeter
-                                        </a>
-                                        <div class="modal fade" id="suspendModal" tabindex="-1"
-                                            aria-labelledby="suspendModalLabel" aria-hidden="true">
-                                            <div class="modal-dialog modal-dialog modal-dialog-centered">
-                                                <div class="modal-content radius-16 bg-base">
-                                                    <div
-                                                        class="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0 bg-danger-600">
-                                                        <h1 class="modal-title fs-5 text-white" id="suspendModalLabel">
-                                                            Rejeter
-                                                        </h1>
-                                                        <button type="button" class="btn-close"
-                                                            style="background-color: white" data-bs-dismiss="modal"
-                                                            aria-label="Close"></button>
-                                                    </div>
-                                                    <div class="modal-body p-24">
-                                                        <form action="#">
-                                                            <div class="row">
-                                                                <p>
-                                                                    Êtes-vous sûr de vouloir rejeter ce remboursement ?
-                                                                </p>
-                                                                <div
-                                                                    class="d-flex align-items-center justify-content-center gap-3 mt-24">
-                                                                    <button type="reset" data-bs-dismiss="modal"
-                                                                        aria-label="Close"
-                                                                        class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">
-                                                                        Annuler
-                                                                    </button>
-                                                                    <button type="submit"
-                                                                        class="btn btn-danger border border-danger-600 text-md px-50 py-12 radius-8">
-                                                                        Oui, Rejeter
-                                                                    </button>
+
+                                            <a href="javascript:void(0)" title="Rejeter"
+                                                class="btn bg-danger-focus text-danger-main d-inline-flex align-items-center justify-content-center"
+                                                data-bs-toggle="modal" data-bs-target="#rejeterModal{{ $item->id_reservation }}">
+                                                <iconify-icon icon="lucide:x"></iconify-icon> Rejeter
+                                            </a>
+                                            <div class="modal fade" id="rejeterModal{{ $item->id_reservation }}" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog modal-dialog-centered">
+                                                    <div class="modal-content radius-16 bg-base">
+                                                        <div class="modal-header py-16 px-24 border border-top-0 border-start-0 border-end-0 bg-danger-600">
+                                                            <h1 class="modal-title fs-5 text-white">Rejeter</h1>
+                                                            <button type="button" class="btn-close" style="background-color: white" data-bs-dismiss="modal"></button>
+                                                        </div>
+                                                        <div class="modal-body p-24">
+                                                            <form action="{{ route('remboursements.rejeter', $item->id_reservation) }}" method="POST">
+                                                                @csrf
+                                                                <div class="mb-20">
+                                                                    <label class="form-label fw-semibold">Raison du rejet <strong style="color:red">*</strong></label>
+                                                                    <textarea name="raison" required class="form-control radius-8" rows="3" placeholder="Ex: Politique de remboursement non respectée"></textarea>
                                                                 </div>
-                                                            </div>
-                                                        </form>
+                                                                <p>Êtes-vous sûr de vouloir rejeter ce remboursement ?</p>
+                                                                <div class="d-flex align-items-center justify-content-center gap-3 mt-24">
+                                                                    <button type="reset" data-bs-dismiss="modal" class="border border-danger-600 bg-hover-danger-200 text-danger-600 text-md px-50 py-11 radius-8">Annuler</button>
+                                                                    <button type="submit" class="btn btn-danger border border-danger-600 text-md px-50 py-12 radius-8">Oui, Rejeter</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                </td>
-                            </tr>
-                            @foreach ($remboursement as $item)
-                            @endforeach
+                                        @else
+                                            <span class="text-secondary-light text-sm">Déjà traité</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-40 text-secondary-light">
+                                        Aucune demande de remboursement.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>

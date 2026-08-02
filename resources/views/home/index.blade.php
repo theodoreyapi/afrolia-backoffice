@@ -1,5 +1,70 @@
 @extends('layouts.master', ['title' => 'Tableau de bord'])
 
+@push('scripts')
+    <script>
+        // ── Graphique "Statistiques revenu" (#chart) ──
+        var revenueOptions = {
+            series: [{
+                name: 'Revenus bruts',
+                data: @json($monthValues)
+            }],
+            chart: {
+                type: 'area',
+                height: 280,
+                toolbar: {
+                    show: false
+                }
+            },
+            xaxis: {
+                categories: @json($monthLabels)
+            },
+            colors: ['#487FFF'],
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                curve: 'smooth',
+                width: 2
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return val.toLocaleString('fr-FR') + ' FCFA';
+                    }
+                }
+            }
+        };
+        new ApexCharts(document.querySelector("#chart"), revenueOptions).render();
+
+        // ── Graphique "Statistiques Gains" (#paymentStatusChart) ──
+        var paymentStatusOptions = {
+            series: @json($paymentStatusValues),
+            chart: {
+                type: 'donut',
+                height: 280
+            },
+            labels: @json($paymentStatusLabels),
+            colors: ['#FFC107', '#0d6efd', '#28a745'],
+            legend: {
+                position: 'bottom'
+            },
+            dataLabels: {
+                formatter: function(val, opts) {
+                    return opts.w.config.series[opts.seriesIndex].toLocaleString('fr-FR');
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return val.toLocaleString('fr-FR') + ' FCFA';
+                    }
+                }
+            }
+        };
+        new ApexCharts(document.querySelector("#paymentStatusChart"), paymentStatusOptions).render();
+    </script>
+@endpush
+
 @section('content')
     <div class="dashboard-main-body">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24">
@@ -211,12 +276,12 @@
                             <ul class="nav border-gradient-tab nav-pills mb-0" id="pills-tab" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <button class="nav-link d-flex align-items-center active" id="pills-recent-leads-tab"
-                                        data-bs-toggle="pill" data-bs-target="#pills-recent-leads" type="button"
-                                        role="tab" aria-controls="pills-recent-leads" aria-selected="false"
-                                        tabindex="-1">
+                                        ...>
                                         Dernière Réservation
                                         <span
-                                            class="text-sm fw-semibold py-6 px-12 bg-neutral-500 rounded-pill text-white line-height-1 ms-12 notification-alert">35</span>
+                                            class="text-sm fw-semibold py-6 px-12 bg-neutral-500 rounded-pill text-white line-height-1 ms-12 notification-alert">
+                                            {{ $recentReservations->count() }}
+                                        </span>
                                     </button>
                                 </li>
                             </ul>
@@ -229,113 +294,55 @@
                                     <table class="table bordered-table sm-table mb-0">
                                         <thead>
                                             <tr>
-                                                <th scope="col">Users </th>
-                                                <th scope="col">Registered On</th>
-                                                <th scope="col">Plan</th>
-                                                <th scope="col" class="text-center">Status</th>
+                                                <th scope="col">Client</th>
+                                                <th scope="col">Service</th>
+                                                <th scope="col">Date</th>
+                                                <th scope="col" class="text-center">Statut</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="{{ URL::asset('') }}assets/images/users/user1.png"
-                                                            alt=""
-                                                            class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="text-md mb-0 fw-medium">Dianne Russell</h6>
-                                                            <span
-                                                                class="text-sm text-secondary-light fw-medium">redaniel@gmail.com</span>
+                                            @forelse($recentReservations as $r)
+                                                <tr>
+                                                    <td>
+                                                        <div class="d-flex align-items-center">
+                                                            <img src="{{ $r->client_photo ? asset('storage/' . $r->client_photo) : asset('assets/images/user-default.png') }}"
+                                                                alt=""
+                                                                class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden object-fit-cover">
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="text-md mb-0 fw-medium">{{ $r->client_prenom }}
+                                                                    {{ $r->client_nom }}</h6>
+                                                                <span
+                                                                    class="text-sm text-secondary-light fw-medium">{{ $r->client_email ?? $r->numero_reservation }}</span>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td>27 Mar 2024</td>
-                                                <td>Free</td>
-                                                <td class="text-center">
-                                                    <span
-                                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="{{ URL::asset('') }}assets/images/users/user2.png"
-                                                            alt=""
-                                                            class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="text-md mb-0 fw-medium">Wade Warren</h6>
-                                                            <span
-                                                                class="text-sm text-secondary-light fw-medium">xterris@gmail.com</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>27 Mar 2024</td>
-                                                <td>Basic</td>
-                                                <td class="text-center">
-                                                    <span
-                                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="{{ URL::asset('') }}assets/images/users/user3.png"
-                                                            alt=""
-                                                            class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="text-md mb-0 fw-medium">Albert Flores</h6>
-                                                            <span
-                                                                class="text-sm text-secondary-light fw-medium">seannand@mail.ru</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>27 Mar 2024</td>
-                                                <td>Standard</td>
-                                                <td class="text-center">
-                                                    <span
-                                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="{{ URL::asset('') }}assets/images/users/user4.png"
-                                                            alt=""
-                                                            class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="text-md mb-0 fw-medium">Bessie Cooper </h6>
-                                                            <span
-                                                                class="text-sm text-secondary-light fw-medium">igerrin@gmail.com</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>27 Mar 2024</td>
-                                                <td>Business</td>
-                                                <td class="text-center">
-                                                    <span
-                                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="{{ URL::asset('') }}assets/images/users/user5.png"
-                                                            alt=""
-                                                            class="w-40-px h-40-px rounded-circle flex-shrink-0 me-12 overflow-hidden">
-                                                        <div class="flex-grow-1">
-                                                            <h6 class="text-md mb-0 fw-medium">Arlene McCoy</h6>
-                                                            <span
-                                                                class="text-sm text-secondary-light fw-medium">fellora@mail.ru</span>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>27 Mar 2024</td>
-                                                <td>Enterprise </td>
-                                                <td class="text-center">
-                                                    <span
-                                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Active</span>
-                                                </td>
-                                            </tr>
+                                                    </td>
+                                                    <td>{{ $r->service_libelle }}</td>
+                                                    <td>{{ \Carbon\Carbon::parse($r->date_reservation)->format('d M Y') }}
+                                                    </td>
+                                                    <td class="text-center">
+                                                        @php
+                                                            $statutColors = [
+                                                                'en_attente' => 'warning',
+                                                                'confirmee' => 'info',
+                                                                'en_cours' => 'primary',
+                                                                'terminee' => 'success',
+                                                                'annulee' => 'danger',
+                                                                'no_show' => 'danger',
+                                                            ];
+                                                            $color = $statutColors[$r->statut] ?? 'secondary';
+                                                        @endphp
+                                                        <span
+                                                            class="bg-{{ $color }}-focus text-{{ $color }}-main px-24 py-4 rounded-pill fw-medium text-sm">
+                                                            {{ ucfirst(str_replace('_', ' ', $r->statut)) }}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="4" class="text-center py-40 text-secondary-light">
+                                                        Aucune réservation récente.</td>
+                                                </tr>
+                                            @endforelse
                                         </tbody>
                                     </table>
                                 </div>

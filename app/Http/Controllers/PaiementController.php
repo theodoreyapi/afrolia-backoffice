@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class PaiementController extends Controller
 {
@@ -16,8 +17,35 @@ class PaiementController extends Controller
             return redirect()->intended('index');
         }
 
-        $remboursement = [];
-        return view('publicites.publicites', compact('remboursement'));
+        $succeeded  = DB::table('paiements')->where('status', 'succeeded')->count();
+        $failed     = DB::table('paiements')->where('status', 'failed')->count();
+        $pending    = DB::table('paiements')->where('status', 'pending')->count();
+        $refunded   = DB::table('paiements')->where('status', 'refunded')->count();
+
+        $paiements = DB::table('paiements')
+            ->join('reservations', 'paiements.id_reservation', '=', 'reservations.id_reservation')
+            ->join('users_app as coiffeuses', 'reservations.id_coiffeur', '=', 'coiffeuses.id_user_app')
+            ->select(
+                'paiements.*',
+                'reservations.numero_reservation',
+                'reservations.prix_service',
+                'reservations.montant_commission',
+                'reservations.montant_total',
+                'coiffeuses.name as coiffeuse_prenom',
+                'coiffeuses.last_name as coiffeuse_nom',
+                'coiffeuses.phone as coiffeuse_phone',
+                'coiffeuses.photo as coiffeuse_photo'
+            )
+            ->orderByDesc('paiements.created_at')
+            ->get();
+
+        return view('publicites.publicites', compact(
+            'paiements',
+            'succeeded',
+            'failed',
+            'pending',
+            'refunded'
+        ));
     }
 
     /**

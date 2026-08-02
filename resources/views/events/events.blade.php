@@ -58,8 +58,7 @@
         </div>
         <br>
         <div class="card h-100 p-0 radius-12">
-            <div
-                class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
+            <div class="card-header border-bottom bg-base py-16 px-24 d-flex align-items-center flex-wrap gap-3 justify-content-between">
                 <div class="d-flex align-items-center flex-wrap gap-3">
                     <select class="form-select form-select-sm w-auto ps-12 py-6 radius-12 h-40-px">
                         <option>Status</option>
@@ -84,90 +83,127 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <strong>#AR001567</strong>
-                                    <br>
-                                    Créé le 20/03/2024 à 10:30
-                                    <br>
-                                    <span
-                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Payé</span>
-                                    <span
-                                        class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">En
-                                        attente</span>
-                                    <span
-                                        class="bg-info-focus text-info-main px-24 py-4 rounded-pill fw-medium text-sm">Remboursé</span>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src=" url($item->photo) ? $item->photo : url($item->photo)" alt=""
-                                            class="flex-shrink-0 me-12 radius-8">
-                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">
-                                            Yapi n'guessan kouassi theodore
-                                            <br>
-                                            +2250585831647
-                                        </h6>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src=" url($item->photo) ? $item->photo : url($item->photo)" alt=""
-                                            class="flex-shrink-0 me-12 radius-8">
-                                        <h6 class="text-md mb-0 fw-medium flex-grow-1">
-                                            Yapi theodore
-                                            <br>
-                                            +2250585831648
-                                        </h6>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span>Tresses Africaines</span>
-                                    <h6>17 250 CFA</h6>
-                                    22/03/2024 à 14:00
-                                    <br>
-                                    120 minutes
-                                    <br>
-                                    <span>Service: 15 000 CFA</span>
-                                    <br>
-                                    <span style="color: green">Commission: 2 250 CFA</span>
-                                    <br>
-                                    <em>Stripe</em>
-                                </td>
-                                <td>
-                                    <div class="alert alert-warning alert-dismissible fade show">
-                                        Client préfère les tresses box braids
-                                    </div>
-                                </td>
-                                <td>
-                                    <span
-                                        class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Terminée</span>
-                                    <span
-                                        class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">Annulée</span>
-                                    <span
-                                        class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">En
-                                        attente</span>
-                                    <span
-                                        class="bg-info-focus text-info-main px-24 py-4 rounded-pill fw-medium text-sm">Confirmée</span>
-                                </td>
-                                <td>
-                                    <div class="alert alert-danger alert-dismissible fade show">
-                                        Urgence familiale
+                            @forelse ($reservations as $item)
+                                <tr>
+                                    <td>
+                                        <strong>#{{ $item->numero_reservation }}</strong>
                                         <br>
-                                        Le 24/03/2024 à 16:30
+                                        Créé le {{ \Carbon\Carbon::parse($item->created_at)->format('d/m/Y à H:i') }}
                                         <br>
-                                        par Client ou Coiffeuse
-                                    </div>
-                                    <div class="alert alert-success alert-dismissible fade show">
-                                        5/5
+                                        @if($item->statut_paiement === 'paye')
+                                            <span class="bg-success-focus text-success-main px-24 py-4 rounded-pill fw-medium text-sm">Payé</span>
+                                        @elseif($item->statut_paiement === 'rembourse')
+                                            <span class="bg-info-focus text-info-main px-24 py-4 rounded-pill fw-medium text-sm">Remboursé</span>
+                                        @elseif($item->statut_paiement === 'echoue')
+                                            <span class="bg-danger-focus text-danger-main px-24 py-4 rounded-pill fw-medium text-sm">Échoué</span>
+                                        @else
+                                            <span class="bg-warning-focus text-warning-main px-24 py-4 rounded-pill fw-medium text-sm">En attente</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img height="48" width="48"
+                                                src="{{ $item->client_photo ? asset('storage/'.$item->client_photo) : asset('assets/images/user-default.png') }}"
+                                                alt="" class="flex-shrink-0 me-12 radius-8">
+                                            <h6 class="text-md mb-0 fw-medium flex-grow-1">
+                                                {{ $item->client_prenom }} {{ $item->client_nom }}
+                                                <br>
+                                                {{ $item->client_phone }}
+                                            </h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img height="48" width="48"
+                                                src="{{ $item->coiffeuse_photo ? asset('storage/'.$item->coiffeuse_photo) : asset('assets/images/user-default.png') }}"
+                                                alt="" class="flex-shrink-0 me-12 radius-8">
+                                            <h6 class="text-md mb-0 fw-medium flex-grow-1">
+                                                {{ $item->coiffeuse_prenom }} {{ $item->coiffeuse_nom }}
+                                                <br>
+                                                {{ $item->coiffeuse_phone }}
+                                            </h6>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span>{{ $item->service_libelle }}</span>
+                                        <h6>{{ number_format($item->montant_total, 0, ',', ' ') }} CFA</h6>
+                                        {{ \Carbon\Carbon::parse($item->date_reservation)->format('d/m/Y') }} à
+                                        {{ \Carbon\Carbon::parse($item->heure_reservation)->format('H:i') }}
                                         <br>
-                                        "Excellent travail, très satisfaite!"
+                                        {{ $item->service_duree }} minutes
                                         <br>
-                                        Terminé le 22/03/2024 à 18:00
-                                    </div>
-                                </td>
-                            </tr>
-                            @foreach ($reservations as $item)
-                            @endforeach
+                                        <span>Service: {{ number_format($item->prix_service, 0, ',', ' ') }} CFA</span>
+                                        <br>
+                                        <span style="color: green">Commission: {{ number_format($item->montant_commission, 0, ',', ' ') }} CFA</span>
+                                        <br>
+                                        <em>{{ ucfirst($item->methode_paiement) }}</em>
+                                    </td>
+                                    <td>
+                                        @if($item->notes)
+                                            <div class="alert alert-warning alert-dismissible fade show">
+                                                {{ $item->notes }}
+                                            </div>
+                                        @else
+                                            —
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @php
+                                            $statutColors = [
+                                                'en_attente' => 'warning',
+                                                'confirmee'  => 'info',
+                                                'en_cours'   => 'primary',
+                                                'terminee'   => 'success',
+                                                'annulee'    => 'danger',
+                                                'no_show'    => 'danger',
+                                            ];
+                                            $color = $statutColors[$item->statut] ?? 'secondary';
+                                        @endphp
+                                        <span class="bg-{{ $color }}-focus text-{{ $color }}-main px-24 py-4 rounded-pill fw-medium text-sm">
+                                            {{ ucfirst(str_replace('_', ' ', $item->statut)) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($item->statut === 'annulee' && $item->raison_annulation)
+                                            <div class="alert alert-danger alert-dismissible fade show">
+                                                {{ $item->raison_annulation }}
+                                                @if($item->annule_le)
+                                                    <br>
+                                                    Le {{ \Carbon\Carbon::parse($item->annule_le)->format('d/m/Y à H:i') }}
+                                                @endif
+                                                @if($item->annule_par)
+                                                    <br>
+                                                    par {{ ucfirst($item->annule_par) }}
+                                                @endif
+                                            </div>
+                                        @endif
+
+                                        @if($item->review_rating)
+                                            <div class="alert alert-success alert-dismissible fade show">
+                                                {{ $item->review_rating }}/5
+                                                @if($item->review_comment)
+                                                    <br>
+                                                    "{{ $item->review_comment }}"
+                                                @endif
+                                                @if($item->termine_le)
+                                                    <br>
+                                                    Terminé le {{ \Carbon\Carbon::parse($item->termine_le)->format('d/m/Y à H:i') }}
+                                                @endif
+                                            </div>
+                                        @endif
+
+                                        @if(!$item->raison_annulation && !$item->review_rating)
+                                            —
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="7" class="text-center py-40 text-secondary-light">
+                                        Aucune réservation pour le moment.
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
